@@ -1,0 +1,16 @@
+﻿<Properties StartupConfiguration="{67D6D083-9E72-49E3-83F8-8217CF25D5C8}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="TimeTracking/AppDelegate.cs">
+    <Files>
+      <File FileName="TimeTracking/AppDelegate.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.TimeTracking PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.6AF54683-B76A-4F86-BF9E-84676AE60518">
+    <MonoDevelop.MacDev.AppleDevelopmentTeam />
+  </MonoDevelop.Ide.ItemProperties.TimeTracking>
+</Properties>
