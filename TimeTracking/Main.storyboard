@@ -170,7 +170,7 @@
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
-                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5al-pZ-buc">
+                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="5al-pZ-buc">
                                                                     <rect key="frame" x="0.0" y="20.5" width="42" height="20.5"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
@@ -224,12 +224,16 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="dlC-g9-f7Z" firstAttribute="leading" secondItem="5SI-x2-IR1" secondAttribute="leading" id="09B-jY-OpY"/>
+                            <constraint firstAttribute="trailing" secondItem="dlC-g9-f7Z" secondAttribute="trailing" id="2KX-xS-5PN"/>
                             <constraint firstAttribute="trailing" secondItem="dlC-g9-f7Z" secondAttribute="trailing" id="6OC-30-7XK"/>
                             <constraint firstAttribute="bottom" secondItem="dlC-g9-f7Z" secondAttribute="bottom" id="6XW-aG-EjC"/>
                             <constraint firstAttribute="trailing" secondItem="rcJ-P4-jVi" secondAttribute="trailing" id="TlV-0T-dFi"/>
+                            <constraint firstAttribute="bottom" secondItem="dlC-g9-f7Z" secondAttribute="bottom" id="byZ-5o-brY"/>
                             <constraint firstItem="rcJ-P4-jVi" firstAttribute="leading" secondItem="5SI-x2-IR1" secondAttribute="leading" id="lcS-ED-DNJ"/>
                             <constraint firstItem="dlC-g9-f7Z" firstAttribute="top" secondItem="rcJ-P4-jVi" secondAttribute="bottom" id="tSv-Ki-Xuw"/>
                             <constraint firstItem="rcJ-P4-jVi" firstAttribute="top" secondItem="MMh-gu-bxA" secondAttribute="bottom" id="wew-W5-tDb"/>
+                            <constraint firstItem="dlC-g9-f7Z" firstAttribute="top" secondItem="rcJ-P4-jVi" secondAttribute="bottom" id="xym-PU-tpw"/>
                             <constraint firstItem="dlC-g9-f7Z" firstAttribute="leading" secondItem="5SI-x2-IR1" secondAttribute="leading" id="yi0-50-Ybd"/>
                         </constraints>
                     </view>

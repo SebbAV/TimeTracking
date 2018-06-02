@@ -20,6 +20,11 @@ namespace TimeTracking
             get => lblName.Text;
             set => lblName.Text = value;
         }
+        public string Position
+        {
+            get => lblPosition.Text;
+            set => lblPosition.Text = value;
+        }
 
         #endregion
 
