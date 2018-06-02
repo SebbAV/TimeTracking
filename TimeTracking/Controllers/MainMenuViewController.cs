@@ -12,6 +12,8 @@ namespace TimeTracking
     public partial class MainMenuViewController : UIViewController, IUICollectionViewDataSource, IUICollectionViewDelegate, IUICollectionViewDelegateFlowLayout
     {
         List<Employee> lst_employees;
+        DatabaseReference root;
+        DatabaseReference userNode;
 
     //    object[] employees = { "id", "name", "position", "rfid" };
 		public MainMenuViewController (IntPtr handle) : base (handle)
@@ -24,27 +26,41 @@ namespace TimeTracking
             CollectionView.Delegate = this;
             CollectionView.DataSource = this;
             lst_employees = new List<Employee>();
-            DatabaseReference root = Database.DefaultInstance.GetRootReference();
-            DatabaseReference userNode = root.GetChild("team_members");
+            InitializeFirebase();
+            FirebaseOnChange();
+
+        }
+
+        #region Firebase Events
+        public void FirebaseOnChange(){
             userNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) => {
-               var data = snapshot.GetValue<NSDictionary>();
-             //  var created = data["created"].ToString();
-             //  var lastModified = data["lastModified"].ToString();
-            //   var name = data["name"].ToString();
-            //   var notesCount = (data["notesCount"] as NSNumber).UInt32Value;
+                var data = snapshot.GetValue<NSDictionary>();
+                var id = data.ValueForKey(new NSString("id")).ToString();
 
+                var temp = lst_employees.Find(x => x.Id.Contains(id.ToString()));
+                var index = lst_employees.FindIndex(x => x.Id.Contains(id.ToString()));
+                if (index != -1)
+                {
+                    temp.Name = data.ValueForKey(new NSString("name")).ToString();
+                    temp.Position = data.ValueForKey(new NSString("position")).ToString();
+                    lst_employees[index] = temp;
+                }
+                CollectionView.ReloadData();
 
-            //   folders.Add(folder);
-
-             //  TableView.ReloadData();
-           });
+            }, (error) => {
+                Console.WriteLine(error.LocalizedDescription);
+            });
+        }
+        public void InitializeFirebase(){
+            root = Database.DefaultInstance.GetRootReference();
+            userNode = root.GetChild("team_members");
             userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) => {
                 var data = snapshot.GetValue<NSDictionary>();
                 var employees = data.Values;
                 foreach (var employee in employees)
                 {
                     Employee temp_employee = new Employee();
-                    temp_employee.Name =  employee.ValueForKey(new NSString("name")).ToString();
+                    temp_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
                     temp_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
                     temp_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
                     temp_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
@@ -53,17 +69,19 @@ namespace TimeTracking
 
                 }
                 CollectionView.ReloadData();
-              
+
             }, (error) => {
                 Console.WriteLine(error.LocalizedDescription);
             });
         }
-
+        #endregion
+        #region CollectionView
         public UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
             var cell = collectionView.DequeueReusableCell(CollectionCellViewController.Key, indexPath) as CollectionCellViewController;
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
+            cell.Status = "Offline";
             cell.BackgroundColor = UIColor.LightGray;
             return cell;
         }
@@ -72,5 +90,8 @@ namespace TimeTracking
         {
             return lst_employees.Count;
         }
+        #endregion
+
+
 	}
 }

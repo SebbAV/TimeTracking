@@ -26,6 +26,19 @@ namespace TimeTracking
             set => lblPosition.Text = value;
         }
 
+        public string Status
+        {
+            get => lblStatus.Text;
+            set {
+                if (value == "Online")
+                    lblStatus.TextColor = UIColor.Green;
+
+                else
+                    lblStatus.TextColor = UIColor.Red;
+                lblStatus.Text = value;
+            }
+        }
+
         #endregion
 
         public CollectionCellViewController (IntPtr handle) : base (handle)
