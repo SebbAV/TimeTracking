@@ -102,6 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Models\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -115,23 +118,23 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="ViewController.cs" />
-    <Compile Include="ViewController.designer.cs">
-      <DependentUpon>ViewController.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CollectionCellViewController.cs" />
-    <Compile Include="CollectionCellViewController.designer.cs">
-      <DependentUpon>CollectionCellViewController.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CollectionReusableViewController.cs" />
-    <Compile Include="CollectionReusableViewController.designer.cs">
-      <DependentUpon>CollectionReusableViewController.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MainMenuViewController.cs" />
-    <Compile Include="MainMenuViewController.designer.cs">
+    <Compile Include="Controllers\MainMenuViewController.cs" />
+    <Compile Include="Controllers\MainMenuViewController.designer.cs">
       <DependentUpon>MainMenuViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Employee.cs" />
+    <Compile Include="Controllers\CollectionCellViewController.cs" />
+    <Compile Include="Controllers\CollectionCellViewController.designer.cs">
+      <DependentUpon>CollectionCellViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\CollectionReusableViewController.cs" />
+    <Compile Include="Controllers\CollectionReusableViewController.designer.cs">
+      <DependentUpon>CollectionReusableViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\ViewController.cs" />
+    <Compile Include="Controllers\ViewController.designer.cs">
+      <DependentUpon>ViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Employee.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\logo.png" />
