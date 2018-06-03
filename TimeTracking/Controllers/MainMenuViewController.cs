@@ -144,15 +144,16 @@ namespace TimeTracking
         public UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
             var cell = collectionView.DequeueReusableCell(CollectionCellViewController.Key, indexPath) as CollectionCellViewController;
-            initilizeButton(cell);
+
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
-          
+            cell.Id = lst_employees[indexPath.Row].Id;
             if (lst_employees[indexPath.Row].Status == null)
                 cell.Status = "Offline";
             else
                 cell.Status = lst_employees[indexPath.Row].Status;
             cell.BackgroundColor = UIColor.LightGray;
+            initilizeButton(cell);
             return cell;
         }
 
@@ -174,13 +175,31 @@ namespace TimeTracking
             };
             cell.BtnDelete.TouchUpInside += delegate {
                 var alert = UIAlertController.Create("Delete user", "Do you want to delete this user",UIAlertControllerStyle.Alert);
-                alert.AddAction(UIAlertAction.Create("OK",UIAlertActionStyle.Default,null));
+                alert.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, delegate {
+                    DatabaseReference userNode_temp =  userNode.GetChild(cell.Id);
+                    userNode_temp.RemoveValue();
+                    userNode_temp.SetValue<NSObject>(null);
+
+                    object[] nodes = { $"team_members/{cell.Id} "};
+                    object[] nodesValues = { null };
+                    var childUpdates = NSDictionary.FromObjectsAndKeys(nodesValues, nodes, nodes.Length);
+                    root.UpdateChildValues(childUpdates);
+                    CollectionView.ReloadData();
+
+
+                }));
                 alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Destructive, null));
                 PresentViewController(alert, true, null);
                 
             };
         }
+        void HandleDelete(UIAlertAction obj,string key)
+        {
+            var s = key;
+        }
         #endregion
+
+
 
 
     }
