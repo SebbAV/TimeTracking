@@ -12,15 +12,12 @@ namespace TimeTracking
 		public AddUserViewController (IntPtr handle) : base (handle)
 		{
 		}
-        public string Id
-        {
-            get;
-            set;
-        }
+
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
+  
           //  txtLechuga.Text = Chicken;
 
 
