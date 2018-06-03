@@ -12,5 +12,19 @@ namespace TimeTracking
 		public EditUserViewController (IntPtr handle) : base (handle)
 		{
 		}
+        public string Id
+        {
+            get;
+            set;
+        }
+
+        public override void ViewDidLoad()
+        {
+            base.ViewDidLoad();
+            var s = Id;
+
+
+
+        }
 	}
 }
