@@ -18,7 +18,6 @@ namespace TimeTracking
         DatabaseReference tempNode;
         string user_id;
 
-        //    object[] employees = { "id", "name", "position", "rfid" };
         public MainMenuViewController(IntPtr handle) : base(handle)
         {
 
@@ -91,24 +90,39 @@ namespace TimeTracking
         }
         public void CheckIfOnline()
         {
+            int cont = 0;
             tempNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
             {
-                var data = snapshot.GetValue<NSDictionary>();
-                var keys = data.Keys;
-                foreach (var employee in lst_employees)
+                try
                 {
-                    foreach (var key in keys)
+                    var data = snapshot.GetValue<NSDictionary>();
+                    var keys = data.Keys;
+                    cont = 0;
+                    foreach (var employee in lst_employees)
                     {
-                        var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
-                        if (index != -1)
+                        
+                        foreach (var key in keys)
                         {
-                            lst_employees[index].Status = "Online";
+                            var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                            if (index != -1)
+                            {
+                                lst_employees[index].Status = "Online";
+                            }
+                            if(cont != index) {
+                                lst_employees[cont].Status = "Offline";
+                            }
                         }
+
+                        cont++;
+
+
                     }
-
-
+                    cont = 0;
+                    CollectionView.ReloadData();
                 }
-                CollectionView.ReloadData();
+                catch(Exception ex) {
+                    
+                }
 
             });
         }
@@ -150,10 +164,17 @@ namespace TimeTracking
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
             cell.Id = lst_employees[indexPath.Row].Id;
-            if (lst_employees[indexPath.Row].Status == null)
+            if (lst_employees[indexPath.Row].Status == null){
                 cell.Status = "Offline";
+              
+            }
+                
             else
+            {
                 cell.Status = lst_employees[indexPath.Row].Status;
+
+            }
+          
             cell.BackgroundColor = UIColor.LightGray;
             initilizeButton(cell);
             return cell;
@@ -194,6 +215,23 @@ namespace TimeTracking
                 alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
                 PresentViewController(alert, true, null);
                 
+            };
+            cell.BtnGoOnline.TouchUpInside += delegate {
+                string fecha = DateTime.Now.ToString();
+               
+                object[] k = { cell.Id };
+                object[] vs = { null };
+                var da = NSDictionary.FromObjectsAndKeys(vs, k, k.Length);
+                tempNode.UpdateChildValues(da);
+                DatabaseReference subNode = tempNode.GetChild(cell.Id);
+
+               DatabaseReference subNode2 = subNode.GetChildByAutoId();
+                object[] keys = { "end_date","start_date","status","uid_worker" };
+                object[] values = { "",new NSString(fecha),0,cell.Id };
+                var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
+                subNode2.SetValue<NSDictionary>(data);
+                CheckIfOnline(); 
+
             };
         }
         void HandleDelete(UIAlertAction obj,string key)
