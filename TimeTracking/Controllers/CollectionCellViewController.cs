@@ -13,6 +13,8 @@ namespace TimeTracking
         public static readonly NSString Key = new NSString(nameof(CollectionCellViewController));
         #endregion
 
+        bool isEditEnabled = false;
+
         #region Properties
 
         public string Name
@@ -38,11 +40,50 @@ namespace TimeTracking
                 lblStatus.Text = value;
             }
         }
+        public UIButton BtnEdit
+        {
+            get => btnEdit;
+            set => BtnEdit = value;
+        }
+        public UIButton BtnDelete
+        {
+            get => btnDelete;
+            // set => null;
+        }
+        public UIButton BtnGoOnline
+        {
+            get => btnGoOnline;
+            // set => null;
+        }
 
         #endregion
+        partial void btnEnableEdit_TouchUpInside(NSObject sender)
+        {
+            if (isEditEnabled)
+            {
+                btnEdit.Hidden = true;
+                btnDelete.Hidden = true;
+                btnGoOnline.Hidden = true;
+                isEditEnabled = false;
+            }
+            else
+            {
+                btnEdit.Hidden = false;
+                btnDelete.Hidden = false;
+                btnGoOnline.Hidden = false;
+                isEditEnabled = true;
+            }
+        }
 
         public CollectionCellViewController (IntPtr handle) : base (handle)
 		{
+            
 		}
+
+        void BtnEdit_TouchUpInside(object sender, EventArgs e)
+        {
+            var s = "Hi";
+        }
+
 	}
 }
