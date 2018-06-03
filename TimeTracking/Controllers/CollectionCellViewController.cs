@@ -16,7 +16,11 @@ namespace TimeTracking
         bool isEditEnabled = false;
 
         #region Properties
-
+        public string Id
+        {
+            get;
+            set;
+        }
         public string Name
         {
             get => lblName.Text;
