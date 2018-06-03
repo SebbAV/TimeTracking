@@ -14,6 +14,7 @@ namespace TimeTracking
         List<Employee> lst_employees;
         DatabaseReference root;
         DatabaseReference userNode;
+        DatabaseReference tempNode;
 
     //    object[] employees = { "id", "name", "position", "rfid" };
 		public MainMenuViewController (IntPtr handle) : base (handle)
@@ -26,8 +27,12 @@ namespace TimeTracking
             CollectionView.Delegate = this;
             CollectionView.DataSource = this;
             lst_employees = new List<Employee>();
+            root = Database.DefaultInstance.GetRootReference();
+            tempNode = root.GetChild("temp_entrance");
+            userNode = root.GetChild("team_members");
             InitializeFirebase();
             FirebaseOnChange();
+            CheckIfOnline_Event();
 
         }
 
@@ -45,15 +50,15 @@ namespace TimeTracking
                     temp.Position = data.ValueForKey(new NSString("position")).ToString();
                     lst_employees[index] = temp;
                 }
+             
                 CollectionView.ReloadData();
 
             }, (error) => {
                 Console.WriteLine(error.LocalizedDescription);
             });
         }
-        public void InitializeFirebase(){
-            root = Database.DefaultInstance.GetRootReference();
-            userNode = root.GetChild("team_members");
+        public void InitializeFirebase(){           
+   
             userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) => {
                 var data = snapshot.GetValue<NSDictionary>();
                 var employees = data.Values;
@@ -68,10 +73,58 @@ namespace TimeTracking
                     lst_employees.Add(temp_employee);
 
                 }
+                CheckIfOnline();
                 CollectionView.ReloadData();
 
             }, (error) => {
                 Console.WriteLine(error.LocalizedDescription);
+            });
+        }
+        public void CheckIfOnline(){
+            tempNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+            {
+                var data = snapshot.GetValue<NSDictionary>();
+                var keys = data.Keys;
+                foreach (var employee in lst_employees)
+                {
+                    foreach(var key in keys){
+                        var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                        if (index != -1)
+                        {
+                            lst_employees[index].Status = "Online";
+                        }     
+                    }
+
+                                           
+                }
+                CollectionView.ReloadData();
+
+            });
+        }
+        public void CheckIfOnline_Event(){
+
+            tempNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) => {
+
+                var data = snapshot.GetValue<NSDictionary>();
+                var keys = data.Keys;
+                foreach (var employee in lst_employees)
+                {
+                    foreach (var key in keys)
+                    {
+                        var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                        if (index != -1)
+                        {
+                            lst_employees[index].Status = "Online";
+                        }
+                        else {
+                            lst_employees[index].Status = "Offline";
+                        }
+                    }
+
+
+                }
+                CollectionView.ReloadData();
+
             });
         }
         #endregion
@@ -81,7 +134,10 @@ namespace TimeTracking
             var cell = collectionView.DequeueReusableCell(CollectionCellViewController.Key, indexPath) as CollectionCellViewController;
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
-            cell.Status = "Offline";
+            if (lst_employees[indexPath.Row].Status == null)
+                cell.Status = "Offline";
+            else         
+                cell.Status = lst_employees[indexPath.Row].Status;
             cell.BackgroundColor = UIColor.LightGray;
             return cell;
         }
