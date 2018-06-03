@@ -16,17 +16,18 @@ namespace TimeTracking
         DatabaseReference userNode;
         DatabaseReference tempNode;
 
-    //    object[] employees = { "id", "name", "position", "rfid" };
-		public MainMenuViewController (IntPtr handle) : base (handle)
-		{
-            
-		}
+        //    object[] employees = { "id", "name", "position", "rfid" };
+        public MainMenuViewController(IntPtr handle) : base(handle)
+        {
+
+        }
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
             CollectionView.Delegate = this;
             CollectionView.DataSource = this;
             lst_employees = new List<Employee>();
+
             root = Database.DefaultInstance.GetRootReference();
             tempNode = root.GetChild("temp_entrance");
             userNode = root.GetChild("team_members");
@@ -37,8 +38,10 @@ namespace TimeTracking
         }
 
         #region Firebase Events
-        public void FirebaseOnChange(){
-            userNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) => {
+        public void FirebaseOnChange()
+        {
+            userNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
+            {
                 var data = snapshot.GetValue<NSDictionary>();
                 var id = data.ValueForKey(new NSString("id")).ToString();
 
@@ -50,16 +53,19 @@ namespace TimeTracking
                     temp.Position = data.ValueForKey(new NSString("position")).ToString();
                     lst_employees[index] = temp;
                 }
-             
+
                 CollectionView.ReloadData();
 
-            }, (error) => {
+            }, (error) =>
+            {
                 Console.WriteLine(error.LocalizedDescription);
             });
         }
-        public void InitializeFirebase(){           
-   
-            userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) => {
+        public void InitializeFirebase()
+        {
+
+            userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+            {
                 var data = snapshot.GetValue<NSDictionary>();
                 var employees = data.Values;
                 foreach (var employee in employees)
@@ -76,34 +82,39 @@ namespace TimeTracking
                 CheckIfOnline();
                 CollectionView.ReloadData();
 
-            }, (error) => {
+            }, (error) =>
+            {
                 Console.WriteLine(error.LocalizedDescription);
             });
         }
-        public void CheckIfOnline(){
+        public void CheckIfOnline()
+        {
             tempNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
             {
                 var data = snapshot.GetValue<NSDictionary>();
                 var keys = data.Keys;
                 foreach (var employee in lst_employees)
                 {
-                    foreach(var key in keys){
+                    foreach (var key in keys)
+                    {
                         var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
                         if (index != -1)
                         {
                             lst_employees[index].Status = "Online";
-                        }     
+                        }
                     }
 
-                                           
+
                 }
                 CollectionView.ReloadData();
 
             });
         }
-        public void CheckIfOnline_Event(){
+        public void CheckIfOnline_Event()
+        {
 
-            tempNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) => {
+            tempNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
+            {
 
                 var data = snapshot.GetValue<NSDictionary>();
                 var keys = data.Keys;
@@ -116,7 +127,8 @@ namespace TimeTracking
                         {
                             lst_employees[index].Status = "Online";
                         }
-                        else {
+                        else
+                        {
                             lst_employees[index].Status = "Offline";
                         }
                     }
@@ -132,11 +144,13 @@ namespace TimeTracking
         public UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
             var cell = collectionView.DequeueReusableCell(CollectionCellViewController.Key, indexPath) as CollectionCellViewController;
+            initilizeButton(cell);
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
+          
             if (lst_employees[indexPath.Row].Status == null)
                 cell.Status = "Offline";
-            else         
+            else
                 cell.Status = lst_employees[indexPath.Row].Status;
             cell.BackgroundColor = UIColor.LightGray;
             return cell;
@@ -148,6 +162,26 @@ namespace TimeTracking
         }
         #endregion
 
+        #region Internal Functionallity
+        public void initilizeButton(CollectionCellViewController cell){
+             cell.BtnEdit.Hidden = true;
+            cell.BtnDelete.Hidden = true;
+            cell.BtnGoOnline.Hidden = true;
+            cell.BtnEdit.TouchUpInside += delegate
+            {
+                var s = "s";
 
-	}
+            };
+            cell.BtnDelete.TouchUpInside += delegate {
+                var alert = UIAlertController.Create("Delete user", "Do you want to delete this user",UIAlertControllerStyle.Alert);
+                alert.AddAction(UIAlertAction.Create("OK",UIAlertActionStyle.Default,null));
+                alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Destructive, null));
+                PresentViewController(alert, true, null);
+                
+            };
+        }
+        #endregion
+
+
+    }
 }
