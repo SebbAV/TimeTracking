@@ -6,6 +6,7 @@ using Foundation;
 using UIKit;
 using Firebase.Database;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace TimeTracking
 {
@@ -15,6 +16,7 @@ namespace TimeTracking
         DatabaseReference root;
         DatabaseReference userNode;
         DatabaseReference tempNode;
+        string user_id;
 
         //    object[] employees = { "id", "name", "position", "rfid" };
         public MainMenuViewController(IntPtr handle) : base(handle)
@@ -168,18 +170,19 @@ namespace TimeTracking
              cell.BtnEdit.Hidden = true;
             cell.BtnDelete.Hidden = true;
             cell.BtnGoOnline.Hidden = true;
+
             cell.BtnEdit.TouchUpInside += delegate
             {
-                var s = "s";
+                 user_id = cell.Id;
+                PerformSegue("EditSegue", this);
 
             };
             cell.BtnDelete.TouchUpInside += delegate {
-                var alert = UIAlertController.Create("Delete user", "Do you want to delete this user",UIAlertControllerStyle.Alert);
-                alert.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, delegate {
+                var alert = UIAlertController.Create("Delete employee", "Are you sure you want to delete this employee?",UIAlertControllerStyle.Alert);
+                alert.AddAction(UIAlertAction.Create("Delete", UIAlertActionStyle.Destructive, delegate {
                     DatabaseReference userNode_temp =  userNode.GetChild(cell.Id);
                     userNode_temp.RemoveValue();
                     userNode_temp.SetValue<NSObject>(null);
-
                     object[] nodes = { $"team_members/{cell.Id} "};
                     object[] nodesValues = { null };
                     var childUpdates = NSDictionary.FromObjectsAndKeys(nodesValues, nodes, nodes.Length);
@@ -188,7 +191,7 @@ namespace TimeTracking
 
 
                 }));
-                alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Destructive, null));
+                alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
                 PresentViewController(alert, true, null);
                 
             };
@@ -199,6 +202,16 @@ namespace TimeTracking
         }
         #endregion
 
+
+        public override void PrepareForSegue(UIStoryboardSegue segue, Foundation.NSObject sender)
+        {
+            base.PrepareForSegue(segue, sender);
+                 if (segue.Identifier != "EditSegue")
+                 return;
+            (segue.DestinationViewController as EditUserViewController).Id = user_id;
+
+
+        }
 
 
 
