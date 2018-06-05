@@ -13,12 +13,15 @@ namespace TimeTracking
     public partial class MainMenuViewController : UIViewController, IUICollectionViewDataSource, IUICollectionViewDelegate, IUICollectionViewDelegateFlowLayout
     {
 
+        #region Class variables
         List<Employee> lst_employees;
         DatabaseReference root;
         DatabaseReference userNode;
         DatabaseReference tempNode;
         DatabaseReference timetrackingNode;
         string user_id;
+        #endregion
+
 
         public MainMenuViewController(IntPtr handle) : base(handle)
         {
@@ -30,18 +33,26 @@ namespace TimeTracking
             CollectionView.Delegate = this;
             CollectionView.DataSource = this;
             lst_employees = new List<Employee>();
-
+            //Gets the all t he information of the database.
             root = Database.DefaultInstance.GetRootReference();
+            //Get the child nodes from the root.
             tempNode = root.GetChild("temp_entrance");
             userNode = root.GetChild("team_members");
             timetrackingNode = root.GetChild("time_tracking");
+            //Method to load the information of the employees to the collection cell.
             InitializeFirebase();
+            //Adds an event to check if there is a change on the userNode.
             FirebaseOnChange();
+
+            //Adds an event to check if the user is online or offline.
             CheckIfOnline_Event();
 
         }
 
         #region Firebase Events
+        /// <summary>
+        /// Initialize an observent events that keeps looking for changes on the team_members node.
+        /// </summary>
         public void FirebaseOnChange()
         {
             try {
@@ -71,6 +82,9 @@ namespace TimeTracking
             }
 
         }
+        /// <summary>
+        /// Method that looks for data in the team_members node and loads it to the collection view.
+        /// </summary>
         public void InitializeFirebase()
         {
             try
@@ -104,6 +118,9 @@ namespace TimeTracking
             }
 
         }
+        /// <summary>
+        /// Adds an event to check the status of the user (online or offline).
+        /// </summary>
         public void CheckIfOnline()
         {
             int cont = 0;
@@ -111,15 +128,16 @@ namespace TimeTracking
             {
                 try
                 {
+                    //Gets the informaiton recieved from the event, in the provided node.
                     var data = snapshot.GetValue<NSDictionary>();
                     var keys = data.Keys;
-                    cont = 0;
                     foreach (var employee in lst_employees)
                     {
-                        
                         foreach (var key in keys)
                         {
+                            //Looks for the index related to the user key from the event.
                             var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                            //If the user is found then it changes the status to online
                             if (index != -1)
                             {
                                 lst_employees[index].Status = "Online";
@@ -142,19 +160,22 @@ namespace TimeTracking
 
             });
         }
+        //Adds an even to check if there's a change on the temp_entrance node.
         public void CheckIfOnline_Event()
         {
-
+            
             tempNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
             {
-
+                //Gets the informaiton recieved from the event, in the provided node.
                 var data = snapshot.GetValue<NSDictionary>();
                 var keys = data.Keys;
                 foreach (var employee in lst_employees)
                 {
                     foreach (var key in keys)
                     {
+                        //Looks for the index related to the user key from the event.
                         var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                        //If the user is found then it changes the status to online
                         if (index != -1)
                         {
                             lst_employees[index].Status = "Online";
@@ -167,6 +188,7 @@ namespace TimeTracking
 
 
                 }
+                //Reloads the collection view.
                 CollectionView.ReloadData();
 
             });
@@ -192,6 +214,7 @@ namespace TimeTracking
             }
           
             cell.BackgroundColor = UIColor.LightGray;
+            //Method that initialize all the buttons in the Cell.
             initilizeButton(cell);
             return cell;
         }
@@ -203,30 +226,42 @@ namespace TimeTracking
         #endregion
 
         #region Internal Functionallity
+        /// <summary>
+        /// Method that initialize all the buttons contained in the cell.
+        /// All the buttons work with anonymous functions or delegates.
+        /// </summary>
+        /// <param name="cell">Cell.</param>
         public void initilizeButton(CollectionCellViewController cell){
              cell.BtnEdit.Hidden = true;
             cell.BtnDelete.Hidden = true;
             cell.BtnGoOnline.Hidden = true;
 
+            //Calls the segue to send the parameter user_id to the Edit Employee View.
             cell.BtnEdit.TouchUpInside += delegate
             {
                  user_id = cell.Id;
                 PerformSegue("EditSegue", this);
 
             };
+            //Event that delete an employee. It prompts an alert as confirmation to proceed with the delete.
             cell.BtnDelete.TouchUpInside += delegate {
                 try
                 {
                     var alert = UIAlertController.Create("Delete employee", "Are you sure you want to delete this employee?", UIAlertControllerStyle.Alert);
                     alert.AddAction(UIAlertAction.Create("Delete", UIAlertActionStyle.Destructive, delegate
                     {
+                        //Looks for a user in the team_members node.
                         DatabaseReference userNode_temp = userNode.GetChild(cell.Id);
                         userNode_temp.RemoveValue();
+                        //Sets the value to null.
                         userNode_temp.SetValue<NSObject>(null);
                         object[] nodes = { $"team_members/{cell.Id} " };
                         object[] nodesValues = { null };
                         var childUpdates = NSDictionary.FromObjectsAndKeys(nodesValues, nodes, nodes.Length);
+                        //Updates the child to delete the information from the firebase database.
                         root.UpdateChildValues(childUpdates);
+
+                        //Reloads the collectionview.
                         CollectionView.ReloadData();
 
 
@@ -237,6 +272,8 @@ namespace TimeTracking
                 catch (Exception ex ) {}
                 
             };
+
+            //Method to check if the user is online or offline.
             cell.BtnGoOnline.TouchUpInside += delegate {
                 try
                 {
@@ -244,21 +281,32 @@ namespace TimeTracking
 
                     if (cell.Status == "Online")
                     {
-
+                        //If the user is online then it looks for the child related to the user id.
                         DatabaseReference onlineNode = tempNode.GetChild(cell.Id);
+                        //Executes a single event to try to get the value from that node.
                         onlineNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
                         {
+                            
                             string fecha = DateTime.Now.ToString();
+                            //Gets the value of the response from firebase.
                             var onlineUser = snapshot.GetValue<NSDictionary>();
+                            //tt_values gets the values of the child node from onlineUser.
                             var tt_values = onlineUser.Values;
+                            //Creates a node in timetracking with the following information /timetracking/{user.id}/{autogenkey}/
                             DatabaseReference tt_node = timetrackingNode.GetChild(cell.Id).GetChild(onlineUser.Keys[0].ToString());
+                            //Create an object with the fields that the node must have.
                             object[] timetracking_key = { "end_date", "start_date", "status", "uid_worker" };
+                            //Gets the information from the temp_entrance.
                             var start_date = tt_values[0].ValueForKey(new NSString("start_date"));
                             var status = tt_values[0].ValueForKey(new NSString("status"));
                             var uid_worker = tt_values[0].ValueForKey(new NSString("uid_worker"));
+                            //Adds the information from temp_entrance to the object timetracking_value.
                             object[] timetracking_value = { fecha, start_date, 1, uid_worker };
+                            //Create a dictonary containing the keys, values and the length of the object.
                             var data = NSDictionary.FromObjectsAndKeys(timetracking_value, timetracking_key, timetracking_key.Length);
+                            //Adds the information to the timetracking node.
                             tt_node.SetValue<NSDictionary>(data);
+                            //Deletes the information from the temp_entrance node.
                             tempNode.GetChild(cell.Id).SetValue<NSDictionary>(null);
                             CheckIfOnline();
                         });
@@ -267,16 +315,22 @@ namespace TimeTracking
                     if (cell.Status == "Offline")
                     {
                         string fecha = DateTime.Now.ToString();
+                        //Create a key object containing the user_id as key.
                         object[] k = { cell.Id };
                         object[] vs = { null };
                         var da = NSDictionary.FromObjectsAndKeys(vs, k, k.Length);
+                        //Adds the child node to the temp_entrance table.
                         tempNode.UpdateChildValues(da);
+                        //Obtained the information from the created node.
                         DatabaseReference subNode = tempNode.GetChild(cell.Id);
-
+                        //Generated an autoid as child of the node created with the user id.
                         DatabaseReference subNode2 = subNode.GetChildByAutoId();
+                        //Created objects with the required fields, and information.
                         object[] keys = { "end_date", "start_date", "status", "uid_worker" };
                         object[] values = { "", new NSString(fecha), 0, cell.Id };
+                        //Created a dictionary with the value, keys and its length. 
                         var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
+                        //Adds the value to the child node.
                         subNode2.SetValue<NSDictionary>(data);
                         CheckIfOnline();
                     }
@@ -290,7 +344,11 @@ namespace TimeTracking
         }
         #endregion
 
-
+        /// <summary>
+        /// Detects when a segue is being called. This allows to add information to the next view controllers while the next view is loading.
+        /// </summary>
+        /// <param name="segue">Segue.</param>
+        /// <param name="sender">Sender.</param>
         public override void PrepareForSegue(UIStoryboardSegue segue, Foundation.NSObject sender)
         {
             base.PrepareForSegue(segue, sender);
