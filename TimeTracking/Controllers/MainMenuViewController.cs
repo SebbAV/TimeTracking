@@ -12,10 +12,12 @@ namespace TimeTracking
 {
     public partial class MainMenuViewController : UIViewController, IUICollectionViewDataSource, IUICollectionViewDelegate, IUICollectionViewDelegateFlowLayout
     {
+
         List<Employee> lst_employees;
         DatabaseReference root;
         DatabaseReference userNode;
         DatabaseReference tempNode;
+        DatabaseReference timetrackingNode;
         string user_id;
 
         public MainMenuViewController(IntPtr handle) : base(handle)
@@ -32,6 +34,7 @@ namespace TimeTracking
             root = Database.DefaultInstance.GetRootReference();
             tempNode = root.GetChild("temp_entrance");
             userNode = root.GetChild("team_members");
+            timetrackingNode = root.GetChild("time_tracking");
             InitializeFirebase();
             FirebaseOnChange();
             CheckIfOnline_Event();
@@ -41,52 +44,65 @@ namespace TimeTracking
         #region Firebase Events
         public void FirebaseOnChange()
         {
-            userNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
-            {
-                var data = snapshot.GetValue<NSDictionary>();
-                var id = data.ValueForKey(new NSString("id")).ToString();
-
-                var temp = lst_employees.Find(x => x.Id.Contains(id.ToString()));
-                var index = lst_employees.FindIndex(x => x.Id.Contains(id.ToString()));
-                if (index != -1)
+            try {
+                userNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
                 {
-                    temp.Name = data.ValueForKey(new NSString("name")).ToString();
-                    temp.Position = data.ValueForKey(new NSString("position")).ToString();
-                    lst_employees[index] = temp;
-                }
+                    var data = snapshot.GetValue<NSDictionary>();
+                    var id = data.ValueForKey(new NSString("id")).ToString();
 
-                CollectionView.ReloadData();
+                    var temp = lst_employees.Find(x => x.Id.Contains(id.ToString()));
+                    var index = lst_employees.FindIndex(x => x.Id.Contains(id.ToString()));
+                    if (index != -1)
+                    {
+                        temp.Name = data.ValueForKey(new NSString("name")).ToString();
+                        temp.Position = data.ValueForKey(new NSString("position")).ToString();
+                        lst_employees[index] = temp;
+                    }
 
-            }, (error) =>
-            {
-                Console.WriteLine(error.LocalizedDescription);
-            });
+                    CollectionView.ReloadData();
+
+                }, (error) =>
+                {
+                    Console.WriteLine(error.LocalizedDescription);
+                });
+            }
+            catch(Exception ex){
+                
+            }
+
         }
         public void InitializeFirebase()
         {
-
-            userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+            try
             {
-                var data = snapshot.GetValue<NSDictionary>();
-                var employees = data.Values;
-                foreach (var employee in employees)
+                userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
                 {
-                    Employee temp_employee = new Employee();
-                    temp_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
-                    temp_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
-                    temp_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
-                    temp_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
+                    var data = snapshot.GetValue<NSDictionary>();
+                    var employees = data.Values;
+                    foreach (var employee in employees)
+                    {
+                        Employee temp_employee = new Employee();
+                        temp_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
+                        temp_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
+                        temp_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
+                        temp_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
 
-                    lst_employees.Add(temp_employee);
+                        lst_employees.Add(temp_employee);
 
-                }
-                CheckIfOnline();
-                CollectionView.ReloadData();
+                    }
+                    CheckIfOnline();
+                    CollectionView.ReloadData();
 
-            }, (error) =>
+                }, (error) =>
+                {
+                    Console.WriteLine(error.LocalizedDescription);
+                });
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine(error.LocalizedDescription);
-            });
+
+            }
+
         }
         public void CheckIfOnline()
         {
@@ -199,44 +215,78 @@ namespace TimeTracking
 
             };
             cell.BtnDelete.TouchUpInside += delegate {
-                var alert = UIAlertController.Create("Delete employee", "Are you sure you want to delete this employee?",UIAlertControllerStyle.Alert);
-                alert.AddAction(UIAlertAction.Create("Delete", UIAlertActionStyle.Destructive, delegate {
-                    DatabaseReference userNode_temp =  userNode.GetChild(cell.Id);
-                    userNode_temp.RemoveValue();
-                    userNode_temp.SetValue<NSObject>(null);
-                    object[] nodes = { $"team_members/{cell.Id} "};
-                    object[] nodesValues = { null };
-                    var childUpdates = NSDictionary.FromObjectsAndKeys(nodesValues, nodes, nodes.Length);
-                    root.UpdateChildValues(childUpdates);
-                    CollectionView.ReloadData();
+                try
+                {
+                    var alert = UIAlertController.Create("Delete employee", "Are you sure you want to delete this employee?", UIAlertControllerStyle.Alert);
+                    alert.AddAction(UIAlertAction.Create("Delete", UIAlertActionStyle.Destructive, delegate
+                    {
+                        DatabaseReference userNode_temp = userNode.GetChild(cell.Id);
+                        userNode_temp.RemoveValue();
+                        userNode_temp.SetValue<NSObject>(null);
+                        object[] nodes = { $"team_members/{cell.Id} " };
+                        object[] nodesValues = { null };
+                        var childUpdates = NSDictionary.FromObjectsAndKeys(nodesValues, nodes, nodes.Length);
+                        root.UpdateChildValues(childUpdates);
+                        CollectionView.ReloadData();
 
 
-                }));
-                alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
-                PresentViewController(alert, true, null);
+                    }));
+                    alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
+                    PresentViewController(alert, true, null);
+                }
+                catch (Exception ex ) {}
                 
             };
             cell.BtnGoOnline.TouchUpInside += delegate {
-                string fecha = DateTime.Now.ToString();
-               
-                object[] k = { cell.Id };
-                object[] vs = { null };
-                var da = NSDictionary.FromObjectsAndKeys(vs, k, k.Length);
-                tempNode.UpdateChildValues(da);
-                DatabaseReference subNode = tempNode.GetChild(cell.Id);
+                try
+                {
 
-               DatabaseReference subNode2 = subNode.GetChildByAutoId();
-                object[] keys = { "end_date","start_date","status","uid_worker" };
-                object[] values = { "",new NSString(fecha),0,cell.Id };
-                var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
-                subNode2.SetValue<NSDictionary>(data);
-                CheckIfOnline(); 
+
+                    if (cell.Status == "Online")
+                    {
+
+                        DatabaseReference onlineNode = tempNode.GetChild(cell.Id);
+                        onlineNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+                        {
+                            string fecha = DateTime.Now.ToString();
+                            var onlineUser = snapshot.GetValue<NSDictionary>();
+                            var tt_values = onlineUser.Values;
+                            DatabaseReference tt_node = timetrackingNode.GetChild(cell.Id).GetChild(onlineUser.Keys[0].ToString());
+                            object[] timetracking_key = { "end_date", "start_date", "status", "uid_worker" };
+                            var start_date = tt_values[0].ValueForKey(new NSString("start_date"));
+                            var status = tt_values[0].ValueForKey(new NSString("status"));
+                            var uid_worker = tt_values[0].ValueForKey(new NSString("uid_worker"));
+                            object[] timetracking_value = { fecha, start_date, 1, uid_worker };
+                            var data = NSDictionary.FromObjectsAndKeys(timetracking_value, timetracking_key, timetracking_key.Length);
+                            tt_node.SetValue<NSDictionary>(data);
+                            tempNode.GetChild(cell.Id).SetValue<NSDictionary>(null);
+                            CheckIfOnline();
+                        });
+
+                    }
+                    if (cell.Status == "Offline")
+                    {
+                        string fecha = DateTime.Now.ToString();
+                        object[] k = { cell.Id };
+                        object[] vs = { null };
+                        var da = NSDictionary.FromObjectsAndKeys(vs, k, k.Length);
+                        tempNode.UpdateChildValues(da);
+                        DatabaseReference subNode = tempNode.GetChild(cell.Id);
+
+                        DatabaseReference subNode2 = subNode.GetChildByAutoId();
+                        object[] keys = { "end_date", "start_date", "status", "uid_worker" };
+                        object[] values = { "", new NSString(fecha), 0, cell.Id };
+                        var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
+                        subNode2.SetValue<NSDictionary>(data);
+                        CheckIfOnline();
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
 
             };
-        }
-        void HandleDelete(UIAlertAction obj,string key)
-        {
-            var s = key;
         }
         #endregion
 
