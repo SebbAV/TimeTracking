@@ -21,7 +21,7 @@ namespace TimeTracking
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            var s = Id;
+            var user_id = Id;
 
 
 
