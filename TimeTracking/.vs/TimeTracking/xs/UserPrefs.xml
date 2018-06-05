@@ -1,7 +1,12 @@
 ﻿<Properties StartupConfiguration="{67D6D083-9E72-49E3-83F8-8217CF25D5C8}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="TimeTracking/AppDelegate.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Main.storyboard">
     <Files>
-      <File FileName="TimeTracking/AppDelegate.cs" Line="1" Column="1" />
+      <File FileName="AppDelegate.cs" Line="3" Column="11" />
+      <File FileName="Controllers/MainMenuViewController.cs" Line="357" Column="45" />
+      <File FileName="Controllers/EditUserViewController.cs" Line="31" Column="17" />
+      <File FileName="Main.cs" Line="12" Column="1" />
+      <File FileName="Controllers/EditUserViewController.designer.cs" Line="1" Column="1" />
+      <File FileName="Main.storyboard" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" />
@@ -10,7 +15,5 @@
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.TimeTracking PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.6AF54683-B76A-4F86-BF9E-84676AE60518">
-    <MonoDevelop.MacDev.AppleDevelopmentTeam />
-  </MonoDevelop.Ide.ItemProperties.TimeTracking>
+  <MonoDevelop.Ide.ItemProperties.TimeTracking PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.D85F2193-EDC3-471D-B625-F21E736BB531" />
 </Properties>

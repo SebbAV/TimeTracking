@@ -7,24 +7,33 @@ using UIKit;
 
 namespace TimeTracking
 {
-	public partial class EditUserViewController : UIViewController
-	{
-		public EditUserViewController (IntPtr handle) : base (handle)
-		{
-		}
+    public partial class EditUserViewController : UIViewController
+    {
+        public EditUserViewController(IntPtr handle) : base(handle)
+        {
+        }
         public string Id
         {
             get;
             set;
         }
-
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            var user_id = Id;
-
-
+            InitializeComponents();
 
         }
-	}
+        #region Internal Functionality
+        void InitializeComponents()
+        {
+            var user_id = Id; 
+            UITapGestureRecognizer lblPositionTap = new UITapGestureRecognizer(() => {
+                
+            });
+            LblPosition.UserInteractionEnabled = true;
+            LblPosition.AddGestureRecognizer(lblPositionTap);
+        }
+
+        #endregion
+    }
 }
