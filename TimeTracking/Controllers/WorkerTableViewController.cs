@@ -26,13 +26,33 @@ namespace TimeTracking
             root = Database.DefaultInstance.GetRootReference();
             workers = root.GetChild("team_members");
             time_tracking = root.GetChild("time_tracking");
+            loadUsers();
 
 
 
         }
+        /// <summary>
+        /// Method to create a single event to check for values in the timetracking node.
+        ///This contains all the dates that the employees has work.
+        /// </summary>
+        public void loadUserTimes(){
+            time_tracking.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+            {
+                var data = snapshot.GetValue<NSDictionary>();
+                //Gets the keys for each user in the table.
+                var keys = data.Keys;
+                foreach (var key in keys)
+                {
+                    var user_data = data.ValueForKey(new NSString(key.ToString()));
+                    //Gets the auto-generated keys in each user.
+                    var autogen_keys = user_data.Keys;
+                    foreach (var user_info in autogen_keys)
+                    {
 
-        public List<Employee> loadUsers(){
-            
+                    }
+
+                }
+            });
         }
 
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
