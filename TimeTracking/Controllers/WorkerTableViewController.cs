@@ -26,7 +26,7 @@ namespace TimeTracking
             root = Database.DefaultInstance.GetRootReference();
             workers = root.GetChild("team_members");
             time_tracking = root.GetChild("time_tracking");
-            loadUsers();
+            loadUsersTimes();
 
 
 
