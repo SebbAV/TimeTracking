@@ -7,6 +7,7 @@ using UIKit;
 using Firebase.Database;
 using System.Collections.Generic;
 using System.Threading;
+using TimeTracking.Controllers;
 
 namespace TimeTracking
 {
@@ -33,6 +34,7 @@ namespace TimeTracking
             CollectionView.Delegate = this;
             CollectionView.DataSource = this;
             lst_employees = new List<Employee>();
+          //  lst_employees = ;
             //Gets the all t he information of the database.
             root = Database.DefaultInstance.GetRootReference();
             //Get the child nodes from the root.
