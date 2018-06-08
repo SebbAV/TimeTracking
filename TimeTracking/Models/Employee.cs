@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using TimeTracking.Models;
+
 namespace TimeTracking
 {
     public class Employee
@@ -28,5 +31,7 @@ namespace TimeTracking
             get;
             set;
         }
+        public List<TimeTrackingClass> WorkedTime { get; set; }
+        public double Payment { get; set; }
     }
 }
