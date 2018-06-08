@@ -7,13 +7,19 @@ using UIKit;
 
 using System.Collections.Generic;
 using Firebase.Database;
+using TimeTracking.Models;
 
 namespace TimeTracking
 {
 	public partial class WorkerTableViewController : UITableViewController
 	{
-
-        DatabaseReference workers,root,time_tracking;
+        Dictionary<string, List<TimeTrackingClass>> employees_time;
+        DatabaseReference workers,root,time_trackingNode,userNode;
+        TimeTrackingClass timeTracking;
+        List<string> key_list;
+        List<TimeTrackingClass> lst_timetracking;
+        Employee employees_keys;
+        List<Employee> lst_Employees;
 
 		public WorkerTableViewController (IntPtr handle) : base (handle)
 		{
@@ -21,44 +27,115 @@ namespace TimeTracking
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
+            lst_timetracking = new List<TimeTrackingClass>();
+            key_list = new List<string>();
+            lst_Employees = new List<Employee>();
+            employees_time = new Dictionary<string, List<TimeTrackingClass>>();
             TableView.Delegate = this;
             TableView.DataSource = this;
+
             root = Database.DefaultInstance.GetRootReference();
-            workers = root.GetChild("team_members");
-            time_tracking = root.GetChild("time_tracking");
-            loadUsersTimes();
+            //workers = root.GetChild("team_members");
+            time_trackingNode = root.GetChild("time_tracking");
+            userNode = root.GetChild("team_members");
+            loadUsers();
+           // loadUserTimes();
 
 
 
+        }
+       public void loadUsers(){
+            try
+            {
+                userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+                {
+                    var data = snapshot.GetValue<NSDictionary>();
+                    var employees = data.Values;
+                    foreach (var employee in employees)
+                    {
+                        Employee temp_employee = new Employee();
+                        temp_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
+                        temp_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
+                        temp_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
+                        temp_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
+
+                        lst_Employees.Add(temp_employee);
+
+                    }
+                    loadUserTimes();
+                   // CheckIfOnline();
+                    //TableView.ReloadData();
+
+                }, (error) =>
+                {
+                    Console.WriteLine(error.LocalizedDescription);
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
         /// <summary>
         /// Method to create a single event to check for values in the timetracking node.
         ///This contains all the dates that the employees has work.
         /// </summary>
         public void loadUserTimes(){
-            time_tracking.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+            time_trackingNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
             {
-                var data = snapshot.GetValue<NSDictionary>();
-                //Gets the keys for each user in the table.
-                var keys = data.Keys;
+            var data = snapshot.GetValue<NSDictionary>();
+            //Gets the keys for each user in the table.
+            var keys = data.Keys;
+                key_list = new List<string>();
                 foreach (var key in keys)
                 {
-                    var user_data = data.ValueForKey(new NSString(key.ToString()));
-                    //Gets the auto-generated keys in each user.
-                    var autogen_keys = user_data.Keys;
-                    foreach (var user_info in autogen_keys)
-                    {
 
+                    double employee_payment = 0;
+                    var user_data = data.ValueForKey(new NSString(key.ToString())) as NSDictionary;
+                    //Gets the auto-generated keys in each user.
+                    employees_keys = new Employee();
+
+                    // DatabaseReference user_tt = user_data.GetChild(new NSString());
+                    employees_keys.Id = key.ToString();
+                    var index = lst_Employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                    Employee temp_employee = lst_Employees.Find(x => x.Id.Contains(key.ToString()));
+                    if (index != -1)
+                    {
+                        key_list.Add(key.ToString());
+                        var autogen_keys = user_data.Keys;
+                        var autogen_values = user_data.Values;
+
+                        foreach (var time in autogen_values)
+                        {
+                            timeTracking = new TimeTrackingClass();
+                            timeTracking.End_Date = DateTime.Parse(time.ValueForKey(new NSString("end_date")).ToString());
+                            timeTracking.Start_Date = DateTime.Parse(time.ValueForKey(new NSString("start_date")).ToString());
+                            TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                            employee_payment += worked_time.Hours;
+                            temp_employee.Payment = employee_payment * 65;
+                            lst_timetracking.Add(timeTracking);
+
+
+                        }
+                        temp_employee.WorkedTime = lst_timetracking;
+                        lst_Employees[index] = temp_employee;
+                        //employees_keys.WorkedTime = lst_timetracking;
+                        // employees_time.Add(employees_keys.Id, lst_timetracking);
+                        // employees.Add(employees_keys);
+                        lst_timetracking = new List<TimeTrackingClass>();   
                     }
 
                 }
+                TableView.ReloadData();
             });
         }
-
+        double total = 0;
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
         {
-            var cell = tableView.DequeueReusableCell("workerTable", indexPath);
-            cell.TextLabel.Text = "hi";
+            var cell = tableView.DequeueReusableCell(WorkerTableCellViewController.key, indexPath) as WorkerTableCellViewController;
+           // var timetracking_cell = employees_time[key_list[indexPath.Section]][indexPath.Row];
+            cell.LblAmount = $"${lst_Employees[indexPath.Section].Payment}";
+            cell.LblHours = $"{lst_Employees[indexPath.Section].Payment/65}";
             return cell;
         }
         public override nint RowsInSection(UITableView tableView, nint section){
@@ -67,8 +144,15 @@ namespace TimeTracking
         [Export("numberOfSectionsInTableView:")]
         public override nint NumberOfSections(UITableView tableView)
         {
-            return 1;
+            return lst_Employees.Count;
         }
+[       Export("tableView:titleForHeaderInSection:")]
+        public string TitleForHeader(UITableView tableView, nint section)
+        {
+            return lst_Employees[(int)section].Name;
+        }
+
+
 
     }
 }
