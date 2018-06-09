@@ -13,13 +13,15 @@ namespace TimeTracking
 {
 	public partial class WorkerTableViewController : UITableViewController
 	{
-        Dictionary<string, List<TimeTrackingClass>> employees_time;
-        DatabaseReference workers,root,time_trackingNode,userNode;
+        #region Class Variables
+        DatabaseReference root, time_trackingNode, userNode;
         TimeTrackingClass timeTracking;
         List<string> key_list;
         List<TimeTrackingClass> lst_timetracking;
-        Employee employees_keys;
         List<Employee> lst_Employees;
+        Employee selected_employee;
+        #endregion
+
 
 		public WorkerTableViewController (IntPtr handle) : base (handle)
 		{
@@ -27,30 +29,37 @@ namespace TimeTracking
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            lst_timetracking = new List<TimeTrackingClass>();
-            key_list = new List<string>();
-            lst_Employees = new List<Employee>();
-            employees_time = new Dictionary<string, List<TimeTrackingClass>>();
-            TableView.Delegate = this;
-            TableView.DataSource = this;
-
-            root = Database.DefaultInstance.GetRootReference();
-            //workers = root.GetChild("team_members");
-            time_trackingNode = root.GetChild("time_tracking");
-            userNode = root.GetChild("team_members");
+            //Calls methods to load the required information.
+            intializeView();
             loadUsers();
-           // loadUserTimes();
 
 
 
         }
+        /// <summary>
+        /// Method to initialize the lists and firebase node references.
+        /// </summary>
+        public void initializeView(){
+            lst_timetracking = new List<TimeTrackingClass>();
+            key_list = new List<string>();
+            lst_Employees = new List<Employee>();
+            TableView.Delegate = this;
+            TableView.DataSource = this;
+
+            root = Database.DefaultInstance.GetRootReference();
+            time_trackingNode = root.GetChild("time_tracking");
+            userNode = root.GetChild("team_members");
+        }
+        //Method to load the users.
        public void loadUsers(){
             try
             {
                 userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
                 {
+                    //Gets the recieved information from the event.
                     var data = snapshot.GetValue<NSDictionary>();
                     var employees = data.Values;
+                    //For each eployee found in the team_members users. It adds it to our global list.
                     foreach (var employee in employees)
                     {
                         Employee temp_employee = new Employee();
@@ -62,9 +71,9 @@ namespace TimeTracking
                         lst_Employees.Add(temp_employee);
 
                     }
+                    //Calls the method loadUsertimes once the employees list has been updated.
                     loadUserTimes();
-                   // CheckIfOnline();
-                    //TableView.ReloadData();
+
 
                 }, (error) =>
                 {
@@ -73,7 +82,7 @@ namespace TimeTracking
             }
             catch (Exception ex)
             {
-
+                throw ex;
             }
         }
         /// <summary>
@@ -91,37 +100,39 @@ namespace TimeTracking
                 {
 
                     double employee_payment = 0;
+                    //Looks for the key in the data received from the event and returns it as a dictionary.
                     var user_data = data.ValueForKey(new NSString(key.ToString())) as NSDictionary;
-                    //Gets the auto-generated keys in each user.
-                    employees_keys = new Employee();
-
-                    // DatabaseReference user_tt = user_data.GetChild(new NSString());
-                    employees_keys.Id = key.ToString();
+                    //Looks for the key in the users list. Returns an index, if it not found this should return a -1
                     var index = lst_Employees.FindIndex(x => x.Id.Contains(key.ToString()));
-                    Employee temp_employee = lst_Employees.Find(x => x.Id.Contains(key.ToString()));
+
                     if (index != -1)
                     {
+                        //Looks for the user and returns it as an Employee class object
+                        Employee temp_employee = lst_Employees.Find(x => x.Id.Contains(key.ToString()));
+                        //Adds the key to the temporary list.
                         key_list.Add(key.ToString());
                         var autogen_keys = user_data.Keys;
                         var autogen_values = user_data.Values;
 
                         foreach (var time in autogen_values)
                         {
+                            //Gets the information found in the time_tracking node. This also calculates the worked time of the user and stores it into
+                            //a list
                             timeTracking = new TimeTrackingClass();
                             timeTracking.End_Date = DateTime.Parse(time.ValueForKey(new NSString("end_date")).ToString());
                             timeTracking.Start_Date = DateTime.Parse(time.ValueForKey(new NSString("start_date")).ToString());
                             TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                            //TODO: Add minutes to the operation.
                             employee_payment += worked_time.Hours;
+                            //TODO: Add fare information to the user.
                             temp_employee.Payment = employee_payment * 65;
                             lst_timetracking.Add(timeTracking);
 
 
                         }
                         temp_employee.WorkedTime = lst_timetracking;
+                        //Finds the employee in the current index and update the information of the employee
                         lst_Employees[index] = temp_employee;
-                        //employees_keys.WorkedTime = lst_timetracking;
-                        // employees_time.Add(employees_keys.Id, lst_timetracking);
-                        // employees.Add(employees_keys);
                         lst_timetracking = new List<TimeTrackingClass>();   
                     }
 
@@ -129,29 +140,57 @@ namespace TimeTracking
                 TableView.ReloadData();
             });
         }
-        double total = 0;
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
         {
             var cell = tableView.DequeueReusableCell(WorkerTableCellViewController.key, indexPath) as WorkerTableCellViewController;
-           // var timetracking_cell = employees_time[key_list[indexPath.Section]][indexPath.Row];
             cell.LblAmount = $"${lst_Employees[indexPath.Section].Payment}";
             cell.LblHours = $"{lst_Employees[indexPath.Section].Payment/65}";
+            cell.BtnDetails.TouchUpInside += delegate {
+                
+                if (lst_Employees.Count < 1)
+                {
+
+                }
+                else
+                {
+                    //Gets the information of the selected employee and calls the segue to send the information to view 
+                    //more details about that employee
+                    selected_employee = new Employee();
+                    selected_employee.Id = lst_Employees[indexPath.Section].Id;
+                    selected_employee.Name = lst_Employees[indexPath.Section].Name;
+                    selected_employee.WorkedTime = lst_Employees[indexPath.Section].WorkedTime;
+                    selected_employee.Payment = lst_Employees[indexPath.Section].Payment;
+                    PerformSegue("Worker_Details", null);
+                }
+
+            };
             return cell;
         }
-        public override nint RowsInSection(UITableView tableView, nint section){
-            return 1;
-        }
-        [Export("numberOfSectionsInTableView:")]
-        public override nint NumberOfSections(UITableView tableView)
-        {
-            return lst_Employees.Count;
-        }
-[       Export("tableView:titleForHeaderInSection:")]
-        public string TitleForHeader(UITableView tableView, nint section)
-        {
-            return lst_Employees[(int)section].Name;
-        }
+        //This method can't be bigger than 1
+        public override nint RowsInSection(UITableView tableView, nint section) => return 1;
 
+        [Export("numberOfSectionsInTableView:")]
+        public override nint NumberOfSections(UITableView tableView) => return lst_Employees.Count;
+
+        [Export("tableView:titleForHeaderInSection:")]
+        public override string TitleForHeader(UITableView tableView, nint section) => return lst_Employees[(int)section].Name;
+
+
+
+        /// <summary>
+        /// Detects when a segue is being called. This allows to add information to the next view controllers while the next view is loading.
+        /// </summary>
+        /// <param name="segue">Segue.</param>
+        /// <param name="sender">Sender.</param>
+        public override void PrepareForSegue(UIStoryboardSegue segue, Foundation.NSObject sender)
+        {
+            base.PrepareForSegue(segue, sender);
+            if (segue.Identifier != "Worker_Details")
+                return;
+            (segue.DestinationViewController as WorkerMainMenuTableViewController).Employee = selected_employee ;
+
+
+        }
 
 
     }
