@@ -30,7 +30,7 @@ namespace TimeTracking
         {
             base.ViewDidLoad();
             //Calls methods to load the required information.
-            intializeView();
+            initializeView();
             loadUsers();
 
 
@@ -167,13 +167,13 @@ namespace TimeTracking
             return cell;
         }
         //This method can't be bigger than 1
-        public override nint RowsInSection(UITableView tableView, nint section) => return 1;
+        public override nint RowsInSection(UITableView tableView, nint section) =>  1;
 
         [Export("numberOfSectionsInTableView:")]
-        public override nint NumberOfSections(UITableView tableView) => return lst_Employees.Count;
+        public override nint NumberOfSections(UITableView tableView) =>  lst_Employees.Count;
 
         [Export("tableView:titleForHeaderInSection:")]
-        public override string TitleForHeader(UITableView tableView, nint section) => return lst_Employees[(int)section].Name;
+        public override string TitleForHeader(UITableView tableView, nint section) =>  lst_Employees[(int)section].Name;
 
 
 
