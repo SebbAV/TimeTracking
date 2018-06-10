@@ -13,6 +13,8 @@ namespace TimeTracking
     public partial class MainMenuViewController : UIViewController, IUICollectionViewDataSource, IUICollectionViewDelegate, IUICollectionViewDelegateFlowLayout
     {
 
+        //BUG FIXES:
+        //Edit Button
         #region Class variables
         List<Employee> lst_employees;
         DatabaseReference root;
@@ -69,8 +71,9 @@ namespace TimeTracking
                         temp.Position = data.ValueForKey(new NSString("position")).ToString();
                         lst_employees[index] = temp;
                     }
-
+                    CheckIfOnline();
                     CollectionView.ReloadData();
+
 
                 }, (error) =>
                 {
@@ -78,7 +81,7 @@ namespace TimeTracking
                 });
             }
             catch(Exception ex){
-                
+                throw ex;   
             }
 
         }
@@ -114,7 +117,7 @@ namespace TimeTracking
             }
             catch (Exception ex)
             {
-
+                throw ex;
             }
 
         }
@@ -129,33 +132,38 @@ namespace TimeTracking
                 try
                 {
                     //Gets the informaiton recieved from the event, in the provided node.
-                    var data = snapshot.GetValue<NSDictionary>();
-                    var keys = data.Keys;
-                    foreach (var employee in lst_employees)
+                    if (snapshot.ChildrenCount > 0)
                     {
-                        foreach (var key in keys)
+                        var data = snapshot.GetValue<NSDictionary>();
+                        var keys = data.Keys;
+                        foreach (var employee in lst_employees)
                         {
-                            //Looks for the index related to the user key from the event.
-                            var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
-                            //If the user is found then it changes the status to online
-                            if (index != -1)
+                            foreach (var key in keys)
                             {
-                                lst_employees[index].Status = "Online";
+                                //Looks for the index related to the user key from the event.
+                                var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
+                                //If the user is found then it changes the status to online
+                                if (index != -1)
+                                {
+                                    lst_employees[index].Status = "Online";
+                                }
+                                if (cont != index)
+                                {
+                                    lst_employees[cont].Status = "Offline";
+                                }
                             }
-                            if(cont != index) {
-                                lst_employees[cont].Status = "Offline";
-                            }
+
+                            cont++;
+
+
                         }
-
-                        cont++;
-
-
+                        cont = 0;
                     }
-                    cont = 0;
+
                     CollectionView.ReloadData();
                 }
                 catch(Exception ex) {
-                    
+                    Console.WriteLine(ex);
                 }
 
             });
@@ -163,35 +171,40 @@ namespace TimeTracking
         //Adds an even to check if there's a change on the temp_entrance node.
         public void CheckIfOnline_Event()
         {
-            
-            tempNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
+            try
             {
+                tempNode.ObserveEvent(DataEventType.ChildChanged, (snapshot, prevKey) =>
+                {
                 //Gets the informaiton recieved from the event, in the provided node.
                 var data = snapshot.GetValue<NSDictionary>();
-                var keys = data.Keys;
-                foreach (var employee in lst_employees)
-                {
-                    foreach (var key in keys)
+                    var keys = data.Keys;
+                    foreach (var employee in lst_employees)
                     {
+                        foreach (var key in keys)
+                        {
                         //Looks for the index related to the user key from the event.
                         var index = lst_employees.FindIndex(x => x.Id.Contains(key.ToString()));
                         //If the user is found then it changes the status to online
                         if (index != -1)
-                        {
-                            lst_employees[index].Status = "Online";
+                            {
+                                lst_employees[index].Status = "Online";
+                            }
+                            else
+                            {
+                                lst_employees[index].Status = "Offline";
+                            }
                         }
-                        else
-                        {
-                            lst_employees[index].Status = "Offline";
-                        }
+
+
                     }
-
-
-                }
                 //Reloads the collection view.
                 CollectionView.ReloadData();
 
-            });
+                });
+            }
+            catch(Exception ex){
+                
+            }
         }
         #endregion
         #region CollectionView
@@ -202,17 +215,17 @@ namespace TimeTracking
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
             cell.Id = lst_employees[indexPath.Row].Id;
-            if (lst_employees[indexPath.Row].Status == null){
+            if (lst_employees[indexPath.Row].Status == null)
+            {
                 cell.Status = "Offline";
-              
+
             }
-                
+
             else
             {
                 cell.Status = lst_employees[indexPath.Row].Status;
 
             }
-          
             cell.BackgroundColor = UIColor.LightGray;
             //Method that initialize all the buttons in the Cell.
             initilizeButton(cell);
@@ -284,32 +297,43 @@ namespace TimeTracking
                         //If the user is online then it looks for the child related to the user id.
                         DatabaseReference onlineNode = tempNode.GetChild(cell.Id);
                         //Executes a single event to try to get the value from that node.
-                        onlineNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
-                        {
-                            
-                            string fecha = DateTime.Now.ToString();
-                            //Gets the value of the response from firebase.
-                            var onlineUser = snapshot.GetValue<NSDictionary>();
-                            //tt_values gets the values of the child node from onlineUser.
-                            var tt_values = onlineUser.Values;
-                            //Creates a node in timetracking with the following information /timetracking/{user.id}/{autogenkey}/
-                            DatabaseReference tt_node = timetrackingNode.GetChild(cell.Id).GetChild(onlineUser.Keys[0].ToString());
-                            //Create an object with the fields that the node must have.
-                            object[] timetracking_key = { "end_date", "start_date", "status", "uid_worker" };
-                            //Gets the information from the temp_entrance.
-                            var start_date = tt_values[0].ValueForKey(new NSString("start_date"));
-                            var status = tt_values[0].ValueForKey(new NSString("status"));
-                            var uid_worker = tt_values[0].ValueForKey(new NSString("uid_worker"));
-                            //Adds the information from temp_entrance to the object timetracking_value.
-                            object[] timetracking_value = { fecha, start_date, 1, uid_worker };
-                            //Create a dictonary containing the keys, values and the length of the object.
-                            var data = NSDictionary.FromObjectsAndKeys(timetracking_value, timetracking_key, timetracking_key.Length);
-                            //Adds the information to the timetracking node.
-                            tt_node.SetValue<NSDictionary>(data);
-                            //Deletes the information from the temp_entrance node.
-                            tempNode.GetChild(cell.Id).SetValue<NSDictionary>(null);
-                            CheckIfOnline();
-                        });
+                            onlineNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+                            {
+
+                                string fecha = DateTime.Now.ToString();
+                                if (snapshot.ChildrenCount > 0)
+                                {
+                                    //Gets the value of the response from firebase.
+                                    var onlineUser = snapshot.GetValue<NSDictionary>();
+                                    //tt_values gets the values of the child node from onlineUser.
+                                    var tt_values = onlineUser.Values;
+                                    //Creates a node in timetracking with the following information /timetracking/{user.id}/{autogenkey}/
+                                    DatabaseReference tt_node = timetrackingNode.GetChild(cell.Id).GetChild(onlineUser.Keys[0].ToString());
+                                    //Create an object with the fields that the node must have.
+                                    object[] timetracking_key = { "end_date", "start_date", "status", "uid_worker" };
+                                    //Gets the information from the temp_entrance.
+                                    var start_date = tt_values[0].ValueForKey(new NSString("start_date"));
+                                    var status = tt_values[0].ValueForKey(new NSString("status"));
+                                    var uid_worker = tt_values[0].ValueForKey(new NSString("uid_worker"));
+                                    //Adds the information from temp_entrance to the object timetracking_value.
+                                    object[] timetracking_value = { fecha, start_date, 1, uid_worker };
+                                    //Create a dictonary containing the keys, values and the length of the object.
+                                    var data = NSDictionary.FromObjectsAndKeys(timetracking_value, timetracking_key, timetracking_key.Length);
+                                    //Adds the information to the timetracking node.
+                                    tt_node.SetValue<NSDictionary>(data);
+                                    //Deletes the information from the temp_entrance node.
+                                    tempNode.GetChild(cell.Id).SetValue<NSDictionary>(null);
+                                int index = lst_employees.FindIndex(x => x.Id.Contains(cell.Id));
+                                    lst_employees[index].Status = "Offline";
+                                    CheckIfOnline();
+                                }
+                                else
+                                {
+                                    int index = lst_employees.FindIndex(x => x.Id.Contains(cell.Id));
+                                    lst_employees[index].Status = "Offline";
+                                    CheckIfOnline();
+                                }
+                            });
 
                     }
                     if (cell.Status == "Offline")
@@ -332,6 +356,8 @@ namespace TimeTracking
                         var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
                         //Adds the value to the child node.
                         subNode2.SetValue<NSDictionary>(data);
+                        int index = lst_employees.FindIndex(x => x.Id.Contains(cell.Id));
+                        lst_employees[index].Status = "Online";
                         CheckIfOnline();
                     }
                 }
