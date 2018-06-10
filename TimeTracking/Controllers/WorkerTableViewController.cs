@@ -121,12 +121,33 @@ namespace TimeTracking
                             timeTracking = new TimeTrackingClass();
                             timeTracking.End_Date = DateTime.Parse(time.ValueForKey(new NSString("end_date")).ToString());
                             timeTracking.Start_Date = DateTime.Parse(time.ValueForKey(new NSString("start_date")).ToString());
-                            TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
-                            //TODO: Add minutes to the operation.
-                            employee_payment += worked_time.Hours;
-                            //TODO: Add fare information to the user.
-                            temp_employee.Payment = employee_payment * 65;
-                            lst_timetracking.Add(timeTracking);
+                            
+
+                            DateTime currentDate = DateTime.Now;
+                            if(currentDate.Month == timeTracking.Start_Date.Month){
+                                if (timeTracking.Start_Date.Day > 15)
+                                {
+                                    if(currentDate.Day > 15){
+                                        TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                                    //TODO: Add minutes to the operation.
+                                    employee_payment += worked_time.Hours;
+                                    //TODO: Add fare information to the user.
+                                    temp_employee.Payment = employee_payment * 65;
+                                    lst_timetracking.Add(timeTracking);   
+                                    }
+
+                                }
+                                else
+                                {
+                                    TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                                    //TODO: Add minutes to the operation.
+                                    employee_payment += worked_time.Hours;
+                                    //TODO: Add fare information to the user.
+                                    temp_employee.Payment = employee_payment * 65;
+                                    lst_timetracking.Add(timeTracking);
+
+                                }                            }
+
 
 
                         }
