@@ -24,8 +24,11 @@ namespace TimeTracking
             employee_details = Employee;
         }
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath){
-            var cell = tableView.DequeueReusableCell("WorkerDetail", indexPath);
-            cell.TextLabel.Text = employee_details.WorkedTime[indexPath.Row].Start_Date.ToString();
+            var cell = tableView.DequeueReusableCell(WorkerMainMenuTableCellViewController.key, indexPath) as WorkerMainMenuTableCellViewController;
+            cell.LblStart = employee_details.WorkedTime[indexPath.Row].Start_Date.ToLongTimeString();
+            cell.LblEnd = employee_details.WorkedTime[indexPath.Row].End_Date.ToLongTimeString();
+            TimeSpan worked_time =  employee_details.WorkedTime[indexPath.Row].End_Date - employee_details.WorkedTime[indexPath.Row].Start_Date ;
+            cell.LblTime = worked_time.ToString();
             return cell;
         }
         public override nint RowsInSection(UITableView tableView, nint section)
@@ -40,7 +43,7 @@ namespace TimeTracking
         [Export("tableView:titleForHeaderInSection:")]
         public override string TitleForHeader(UITableView tableView, nint section)
         {
-            return "";
+            return employee_details.Name;
         }
 	}
 }
