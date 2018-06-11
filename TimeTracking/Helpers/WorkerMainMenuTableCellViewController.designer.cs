@@ -12,9 +12,31 @@ namespace TimeTracking
 	[Register ("WorkerMainMenuTableCellViewController")]
 	partial class WorkerMainMenuTableCellViewController
 	{
+		[Outlet]
+		UIKit.UILabel lblEnd { get; set; }
+
+		[Outlet]
+		UIKit.UILabel lblStart { get; set; }
+
+		[Outlet]
+		UIKit.UILabel lblTime { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (lblStart != null) {
+				lblStart.Dispose ();
+				lblStart = null;
+			}
+
+			if (lblEnd != null) {
+				lblEnd.Dispose ();
+				lblEnd = null;
+			}
+
+			if (lblTime != null) {
+				lblTime.Dispose ();
+				lblTime = null;
+			}
 		}
 	}
 }

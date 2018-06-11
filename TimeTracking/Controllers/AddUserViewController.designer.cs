@@ -12,9 +12,42 @@ namespace TimeTracking
 	[Register ("AddUserViewController")]
 	partial class AddUserViewController
 	{
+		[Outlet]
+		UIKit.UITextField lblAmount { get; set; }
+
+		[Outlet]
+		UIKit.UITextField lblName { get; set; }
+
+		[Outlet]
+		UIKit.UITextField lblPosition { get; set; }
+
+		[Outlet]
+		UIKit.UITextField lblRfid { get; set; }
+
+		[Action ("AddUser_TouchUpInside:")]
+		partial void AddUser_TouchUpInside (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (lblAmount != null) {
+				lblAmount.Dispose ();
+				lblAmount = null;
+			}
+
+			if (lblRfid != null) {
+				lblRfid.Dispose ();
+				lblRfid = null;
+			}
+
+			if (lblName != null) {
+				lblName.Dispose ();
+				lblName = null;
+			}
+
+			if (lblPosition != null) {
+				lblPosition.Dispose ();
+				lblPosition = null;
+			}
 		}
 	}
 }

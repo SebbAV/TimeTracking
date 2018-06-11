@@ -15,6 +15,6 @@ namespace TimeTracking
 		}
         public string LblHours { get => lblHours.Text; set => lblHours.Text = value; }
         public string LblAmount { get => lblAmount.Text; set => lblAmount.Text = value; }
-        public UIButton BtnDetails { get; set; }
+        public UIButton BtnDetails { get => btnDetails; set => btnDetails = value; }
 	}
 }

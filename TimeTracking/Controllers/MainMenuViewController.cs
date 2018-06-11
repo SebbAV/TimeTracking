@@ -21,7 +21,7 @@ namespace TimeTracking
         DatabaseReference userNode;
         DatabaseReference tempNode;
         DatabaseReference timetrackingNode;
-        string user_id;
+        Employee user_id;
         #endregion
 
 
@@ -99,10 +99,12 @@ namespace TimeTracking
                     foreach (var employee in employees)
                     {
                         Employee temp_employee = new Employee();
+                        temp_employee.AuthID = employee.ValueForKey(new NSString("authid")).ToString();
                         temp_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
                         temp_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
                         temp_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
                         temp_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
+                        temp_employee.Fare = Double.Parse(employee.ValueForKey(new NSString("fare")).ToString());
 
                         lst_employees.Add(temp_employee);
 
@@ -245,17 +247,17 @@ namespace TimeTracking
         /// </summary>
         /// <param name="cell">Cell.</param>
         public void initilizeButton(CollectionCellViewController cell){
-             cell.BtnEdit.Hidden = true;
-            cell.BtnDelete.Hidden = true;
-            cell.BtnGoOnline.Hidden = true;
 
-            //Calls the segue to send the parameter user_id to the Edit Employee View.
-            cell.BtnEdit.TouchUpInside += delegate
+            EventHandler editEvent_Handler = (sender, e) =>
             {
-                 user_id = cell.Id;
-                PerformSegue("EditSegue", this);
-
+              var index = lst_employees.FindIndex(x => x.Id.Contains(cell.Id.ToString())); ;
+                user_id = lst_employees[index];
+            PerformSegue("EditSegue", this);
             };
+
+            cell.BtnEdit.TouchUpInside -= editEvent_Handler;
+            //Calls the segue to send the parameter user_id to the Edit Employee View.
+            cell.BtnEdit.TouchUpInside += editEvent_Handler;
             //Event that delete an employee. It prompts an alert as confirmation to proceed with the delete.
             cell.BtnDelete.TouchUpInside += delegate {
                 try
@@ -384,8 +386,6 @@ namespace TimeTracking
 
 
         }
-
-
 
     }
 }

@@ -9,8 +9,24 @@ namespace TimeTracking
 {
 	public partial class WorkerMainMenuTableCellViewController : UITableViewCell
 	{
+        public static readonly NSString key = new NSString(nameof(WorkerMainMenuTableCellViewController));
 		public WorkerMainMenuTableCellViewController (IntPtr handle) : base (handle)
 		{
 		}
+        public string LblStart
+        {
+            get => lblStart.Text;
+            set => lblStart.Text = value;
+        }
+        public string LblEnd
+        {
+            get => lblEnd.Text;
+            set => lblEnd.Text = value;
+        }
+        public string LblTime
+        {
+            get => lblTime.Text;
+            set => lblTime.Text = value;
+        }
 	}
 }

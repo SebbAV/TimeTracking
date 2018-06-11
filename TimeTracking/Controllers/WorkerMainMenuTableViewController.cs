@@ -45,5 +45,12 @@ namespace TimeTracking
         {
             return employee_details.Name;
         }
+        public override void PrepareForSegue(UIStoryboardSegue segue, Foundation.NSObject sender)
+        {
+            base.PrepareForSegue(segue, sender);
+            return;
+
+
+        }
 	}
 }

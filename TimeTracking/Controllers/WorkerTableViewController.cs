@@ -14,6 +14,7 @@ namespace TimeTracking
 	public partial class WorkerTableViewController : UITableViewController
 	{
         #region Class Variables
+        static readonly int section_number = 1;
         DatabaseReference root, time_trackingNode, userNode;
         TimeTrackingClass timeTracking;
         List<string> key_list;
@@ -32,6 +33,7 @@ namespace TimeTracking
             //Calls methods to load the required information.
             initializeView();
             loadUsers();
+            loadUsersAsync();
 
 
 
@@ -50,6 +52,36 @@ namespace TimeTracking
             time_trackingNode = root.GetChild("time_tracking");
             userNode = root.GetChild("team_members");
         }
+        public void loadUsersAsync()
+        {
+            try
+            {
+                userNode.ObserveEvent(DataEventType.ChildChanged, (snapshot,prev) =>
+                {
+                    //Gets the recieved information from the event.
+                    var data = snapshot.GetValue<NSDictionary>();
+                   string name =  data.ValueForKey(new NSString("name")).ToString();
+                    string id = data.ValueForKey(new NSString("id")).ToString();
+                    string fare = data.ValueForKey(new NSString("fare")).ToString();
+                    var index = lst_Employees.FindIndex(x => x.Id.Contains(id));
+                    if(index != -1){
+                        lst_Employees[index].Name = name;
+                        lst_Employees[index].Fare = double.Parse(fare);
+                        loadUserTimes();  
+                    }
+
+
+
+                }, (error) =>
+                {
+                    Console.WriteLine(error.LocalizedDescription);
+                });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         //Method to load the users.
        public void loadUsers(){
             try
@@ -67,6 +99,7 @@ namespace TimeTracking
                         temp_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
                         temp_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
                         temp_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
+                        temp_employee.Fare = Double.Parse(employee.ValueForKey(new NSString("fare")).ToString());
 
                         lst_Employees.Add(temp_employee);
 
@@ -113,7 +146,7 @@ namespace TimeTracking
                         key_list.Add(key.ToString());
                         var autogen_keys = user_data.Keys;
                         var autogen_values = user_data.Values;
-
+                        temp_employee.FortNightWorkedTime = new TimeSpan(0,0,0);
                         foreach (var time in autogen_values)
                         {
                             //Gets the information found in the time_tracking node. This also calculates the worked time of the user and stores it into
@@ -129,10 +162,8 @@ namespace TimeTracking
                                 {
                                     if(currentDate.Day > 15){
                                         TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
-                                    //TODO: Add minutes to the operation.
-                                    employee_payment += worked_time.Hours;
-                                    //TODO: Add fare information to the user.
-                                    temp_employee.Payment = employee_payment * 65;
+                                        employee_payment += Math.Round(worked_time.TotalHours,2);
+                                        temp_employee.FortNightWorkedTime += worked_time;
                                     lst_timetracking.Add(timeTracking);   
                                     }
 
@@ -140,17 +171,17 @@ namespace TimeTracking
                                 else
                                 {
                                     TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
-                                    //TODO: Add minutes to the operation.
-                                    employee_payment += worked_time.Hours;
-                                    //TODO: Add fare information to the user.
-                                    temp_employee.Payment = employee_payment * 65;
-                                    lst_timetracking.Add(timeTracking);
+                                        employee_payment += Math.Round(worked_time.TotalHours,2);
+                                    temp_employee.FortNightWorkedTime += worked_time;
+                                    lst_timetracking.Add(timeTracking);   
 
-                                }                            }
+                                }                            
+                            }
 
 
 
                         }
+                        employee_payment = 0;  
                         temp_employee.WorkedTime = lst_timetracking;
                         //Finds the employee in the current index and update the information of the employee
                         lst_Employees[index] = temp_employee;
@@ -164,10 +195,11 @@ namespace TimeTracking
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
         {
             var cell = tableView.DequeueReusableCell(WorkerTableCellViewController.key, indexPath) as WorkerTableCellViewController;
+            lst_Employees[indexPath.Section].Payment = Math.Round(lst_Employees[indexPath.Section].Fare * lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours,2);
             cell.LblAmount = $"${lst_Employees[indexPath.Section].Payment}";
-            cell.LblHours = $"{lst_Employees[indexPath.Section].Payment/65}";
-            cell.BtnDetails.TouchUpInside += delegate {
-                
+            cell.LblHours = $"{lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours}";
+            EventHandler getEmployee_Handler = (sender, e) =>
+            {
                 if (lst_Employees.Count < 1)
                 {
 
@@ -183,18 +215,19 @@ namespace TimeTracking
                     selected_employee.Payment = lst_Employees[indexPath.Section].Payment;
                     PerformSegue("Worker_Details", null);
                 }
-
             };
+            cell.BtnDetails.TouchUpInside += getEmployee_Handler;
             return cell;
         }
         //This method can't be bigger than 1
-        public override nint RowsInSection(UITableView tableView, nint section) =>  1;
+        public override nint RowsInSection(UITableView tableView, nint section) =>  section_number;
 
         [Export("numberOfSectionsInTableView:")]
         public override nint NumberOfSections(UITableView tableView) =>  lst_Employees.Count;
 
         [Export("tableView:titleForHeaderInSection:")]
         public override string TitleForHeader(UITableView tableView, nint section) =>  lst_Employees[(int)section].Name;
+
 
 
 
