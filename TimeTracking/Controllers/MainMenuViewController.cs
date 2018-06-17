@@ -214,6 +214,8 @@ namespace TimeTracking
         {
             var cell = collectionView.DequeueReusableCell(CollectionCellViewController.Key, indexPath) as CollectionCellViewController;
 
+            //Calls a custom GetCellMethod that sends the current position of the cell and the click handler.
+            cell.GetCellEdit(indexPath.Row, ClickHandler);
             cell.Name = lst_employees[indexPath.Row].Name;
             cell.Position = lst_employees[indexPath.Row].Position;
             cell.Id = lst_employees[indexPath.Row].Id;
@@ -247,17 +249,9 @@ namespace TimeTracking
         /// </summary>
         /// <param name="cell">Cell.</param>
         public void initilizeButton(CollectionCellViewController cell){
+            
 
-            EventHandler editEvent_Handler = (sender, e) =>
-            {
-              var index = lst_employees.FindIndex(x => x.Id.Contains(cell.Id.ToString())); ;
-                user_id = lst_employees[index];
-            PerformSegue("EditSegue", this);
-            };
 
-            cell.BtnEdit.TouchUpInside -= editEvent_Handler;
-            //Calls the segue to send the parameter user_id to the Edit Employee View.
-            cell.BtnEdit.TouchUpInside += editEvent_Handler;
             //Event that delete an employee. It prompts an alert as confirmation to proceed with the delete.
             cell.BtnDelete.TouchUpInside += delegate {
                 try
@@ -372,6 +366,25 @@ namespace TimeTracking
         }
         #endregion
 
+        //Click handler method. This method in being called from CollectionCellViewController.
+        private void ClickHandler(CollectionCellViewController sender, CustomEventCellArgs args)
+        {
+            var cell = sender as CollectionCellViewController;
+
+            if (cell != null)
+            {
+
+            }
+
+            var cellArgs = args as CustomEventCellArgs;
+
+            if (cellArgs != null)
+            {
+                user_id = lst_employees[args.Position];
+                PerformSegue("EditSegue", this);
+            }
+        }
+
         /// <summary>
         /// Detects when a segue is being called. This allows to add information to the next view controllers while the next view is loading.
         /// </summary>
@@ -388,4 +401,5 @@ namespace TimeTracking
         }
 
     }
+    internal delegate void CustomEditEventHandler(CollectionCellViewController sender, CustomEventCellArgs args);
 }

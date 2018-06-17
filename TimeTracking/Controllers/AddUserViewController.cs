@@ -10,9 +10,12 @@ namespace TimeTracking
 {
 	public partial class AddUserViewController : UIViewController
 	{
+        #region Class Variables
         DatabaseReference root = Database.DefaultInstance.GetRootReference();
         DatabaseReference userNode;
         DatabaseReference rfidNode;
+        #endregion
+
 		public AddUserViewController (IntPtr handle) : base (handle)
 		{
 		}
@@ -21,13 +24,17 @@ namespace TimeTracking
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
+            //Initialize firebase nodes.
             userNode = root.GetChild("team_members");
             rfidNode = root.GetChild("rfid");
  
         }
+        #region User Interactions
         partial void AddUser_TouchUpInside(NSObject sender)
         {
+            //Generates a auto id for the team members node.
             DatabaseReference adduserNode = userNode.GetChildByAutoId();
+            //Gets the information from the view.
             double fare = Double.Parse(lblAmount.Text);
             string position = lblPosition.Text;
             string name = lblName.Text;
@@ -38,18 +45,25 @@ namespace TimeTracking
             }
             else
             {
+                //Generates an auto id for the rfid node.
                 DatabaseReference addrfidNode = rfidNode.GetChildByAutoId();
+                //Sets the keys and values for the node.
                 object[] rfid_keys = { "id", "status", "tag" };
                 object[] rfid_val = { addrfidNode.Key, 0, lblRfid.Text };
+                //Join the key with the nodes.
                 var rfid_data = NSDictionary.FromObjectsAndKeys(rfid_val, rfid_keys, rfid_keys.Length);
                 addrfidNode.SetValue(rfid_data);
+                //Sets the keys and values for the node.
                 object[] keys = { "authid", "fare", "id", "name", "position", "rfid" };
                 object[] values = { "undefined", fare, adduserNode.Key, name, position, addrfidNode.Key };
                 var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
                 adduserNode.SetValue(data);
+                //Return to the main view.
                 this.NavigationController.PopViewController(true);
             }
 
         }
+        #endregion
+
     }
 }

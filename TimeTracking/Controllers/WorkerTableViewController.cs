@@ -20,6 +20,7 @@ namespace TimeTracking
         List<string> key_list;
         List<TimeTrackingClass> lst_timetracking;
         List<Employee> lst_Employees;
+        public  EventHandler getEmployee_Handler;
         Employee selected_employee;
         #endregion
 
@@ -32,11 +33,14 @@ namespace TimeTracking
             base.ViewDidLoad();
             //Calls methods to load the required information.
             initializeView();
-            loadUsers();
             loadUsersAsync();
 
 
 
+        }
+        public override void ViewWillAppear(bool animated)
+        {
+            loadUsers();
         }
         /// <summary>
         /// Method to initialize the lists and firebase node references.
@@ -82,8 +86,12 @@ namespace TimeTracking
                 throw ex;
             }
         }
+
+
+
         //Method to load the users.
        public void loadUsers(){
+            lst_Employees = new List<Employee>();
             try
             {
                 userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
@@ -117,6 +125,13 @@ namespace TimeTracking
             {
                 throw ex;
             }
+        }
+
+        public void loadUserTimesOnchange(){
+            time_trackingNode.ObserveEvent(DataEventType.ChildAdded, (snapshot) =>
+            {
+                var data = snapshot.GetValue<NSDictionary>();
+            });
         }
         /// <summary>
         /// Method to create a single event to check for values in the timetracking node.
@@ -157,29 +172,27 @@ namespace TimeTracking
                             
 
                             DateTime currentDate = DateTime.Now;
-                            if(currentDate.Month == timeTracking.Start_Date.Month){
-                                if (timeTracking.Start_Date.Day > 15)
+                            if (currentDate.Month == timeTracking.Start_Date.Month)
+                            {
+                                if (timeTracking.Start_Date.Day < 15 && currentDate.Day < 15)
                                 {
-                                    if(currentDate.Day > 15){
-                                        TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
-                                        employee_payment += Math.Round(worked_time.TotalHours,2);
-                                        temp_employee.FortNightWorkedTime += worked_time;
-                                    lst_timetracking.Add(timeTracking);   
-                                    }
 
+                                    TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                                    employee_payment += Math.Round(worked_time.TotalHours, 2);
+                                    temp_employee.FortNightWorkedTime += worked_time;
+                                    lst_timetracking.Add(timeTracking);
                                 }
-                                else
+
+
+                                if (currentDate.Day > 15 && timeTracking.Start_Date.Day > 15)
                                 {
                                     TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
-                                        employee_payment += Math.Round(worked_time.TotalHours,2);
+                                    employee_payment += Math.Round(worked_time.TotalHours, 2);
                                     temp_employee.FortNightWorkedTime += worked_time;
-                                    lst_timetracking.Add(timeTracking);   
+                                    lst_timetracking.Add(timeTracking);
 
-                                }                            
+                                }
                             }
-
-
-
                         }
                         employee_payment = 0;  
                         temp_employee.WorkedTime = lst_timetracking;
@@ -195,10 +208,20 @@ namespace TimeTracking
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
         {
             var cell = tableView.DequeueReusableCell(WorkerTableCellViewController.key, indexPath) as WorkerTableCellViewController;
+            cell.GetCell(indexPath.Section, ClickHandler);
             lst_Employees[indexPath.Section].Payment = Math.Round(lst_Employees[indexPath.Section].Fare * lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours,2);
             cell.LblAmount = $"${lst_Employees[indexPath.Section].Payment}";
             cell.LblHours = $"{lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours}";
-            EventHandler getEmployee_Handler = (sender, e) =>
+
+
+            return cell;
+        }
+
+        void ClickHandler(WorkerTableCellViewController sender, CustomEventArgs args)
+        {
+            var cell = sender as WorkerTableCellViewController;
+
+            if (cell != null)
             {
                 if (lst_Employees.Count < 1)
                 {
@@ -209,16 +232,23 @@ namespace TimeTracking
                     //Gets the information of the selected employee and calls the segue to send the information to view 
                     //more details about that employee
                     selected_employee = new Employee();
-                    selected_employee.Id = lst_Employees[indexPath.Section].Id;
-                    selected_employee.Name = lst_Employees[indexPath.Section].Name;
-                    selected_employee.WorkedTime = lst_Employees[indexPath.Section].WorkedTime;
-                    selected_employee.Payment = lst_Employees[indexPath.Section].Payment;
+                    selected_employee.Id = lst_Employees[args.Position].Id;
+                    selected_employee.Name = lst_Employees[args.Position].Name;
+                    selected_employee.WorkedTime = lst_Employees[args.Position].WorkedTime;
+                    selected_employee.Payment = lst_Employees[args.Position].Payment;
                     PerformSegue("Worker_Details", null);
                 }
-            };
-            cell.BtnDetails.TouchUpInside += getEmployee_Handler;
-            return cell;
+            }
+
+            var yourArgs = args as CustomEventArgs;
+
+            if (yourArgs != null)
+            {
+                // do stuff
+            }
         }
+
+
         //This method can't be bigger than 1
         public override nint RowsInSection(UITableView tableView, nint section) =>  section_number;
 
@@ -248,4 +278,7 @@ namespace TimeTracking
 
 
     }
+    //Interal is used to allow the access to this delegate just to this asssembly
+    internal delegate void CustomEventHandler(WorkerTableCellViewController sender, CustomEventArgs args);
 }
+

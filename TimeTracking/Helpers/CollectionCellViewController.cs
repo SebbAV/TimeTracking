@@ -13,25 +13,16 @@ namespace TimeTracking
         public static readonly NSString Key = new NSString(nameof(CollectionCellViewController));
         #endregion
 
+        CustomEditEventHandler HandlerForButtonEdit;
+        CustomEditEventHandler HandlerForButtonOnline;
+        CustomEditEventHandler HandlerForButtonDelete;
+        int CellPosition;
         bool isEditEnabled = false;
 
         #region Properties
-        public string Id
-        {
-            get;
-            set;
-        }
-        public string Name
-        {
-            get => lblName.Text;
-            set => lblName.Text = value;
-        }
-        public string Position
-        {
-            get => lblPosition.Text;
-            set => lblPosition.Text = value;
-        }
-
+        public string Id { get; set; }
+        public string Name { get => lblName.Text; set => lblName.Text = value; }
+        public string Position  {  get => lblPosition.Text;  set => lblPosition.Text = value; }
         public string Status
         {
             get => lblStatus.Text;
@@ -44,21 +35,9 @@ namespace TimeTracking
                 lblStatus.Text = value;
             }
         }
-        public UIButton BtnEdit
-        {
-            get => btnEdit;
-            set => BtnEdit = value;
-        }
-        public UIButton BtnDelete
-        {
-            get => btnDelete;
-            // set => null;
-        }
-        public UIButton BtnGoOnline
-        {
-            get => btnGoOnline;
-            // set => null;
-        }
+        public UIButton BtnEdit {  get => btnEdit; set => BtnEdit = value; }
+        public UIButton BtnDelete { get => btnDelete;  }
+        public UIButton BtnGoOnline { get => btnGoOnline; }
 
         #endregion
         partial void btnEnableEdit_TouchUpInside(NSObject sender)
@@ -83,11 +62,78 @@ namespace TimeTracking
 		{
             
 		}
-
-        void BtnEdit_TouchUpInside(object sender, EventArgs e)
+        public override void PrepareForReuse()
         {
-            var s = "Hi";
+            base.PrepareForReuse();
+            if (HandlerForButtonEdit != null)
+            {
+                BtnEdit.TouchUpInside -= ButtonEditPressed;
+            }
+            if (HandlerForButtonDelete != null)
+            {
+                BtnDelete.TouchUpInside -= ButtonDeletePressed;
+            }
+            if (HandlerForButtonOnline != null)
+            {
+                BtnGoOnline.TouchUpInside -= ButtonOnlinePressed;
+            }
+            CellPosition = -1;
+            HandlerForButtonEdit = null;
+            HandlerForButtonDelete = null;
+            HandlerForButtonOnline = null;
         }
+        private void ButtonEditPressed(object sender, EventArgs args)
+        {
+            var eventArgs = new CustomEventCellArgs(this, CellPosition);
+            if (HandlerForButtonEdit != null)
+                 HandlerForButtonEdit(this, eventArgs);
 
-	}
+        }
+        private void ButtonOnlinePressed(object sender, EventArgs args)
+        {
+            var eventArgs = new CustomEventCellArgs(this, CellPosition);
+            if (HandlerForButtonOnline != null)
+                HandlerForButtonOnline(this, eventArgs);
+
+        }
+        private void ButtonDeletePressed(object sender, EventArgs args)
+        {
+            var eventArgs = new CustomEventCellArgs(this, CellPosition);
+ 
+            if (HandlerForButtonDelete != null)
+                HandlerForButtonDelete(this, eventArgs);
+
+
+        }
+        internal void GetCellEdit(int position, CustomEditEventHandler handler)
+        {
+            HandlerForButtonEdit = handler;
+            CellPosition = position;
+            BtnEdit.TouchUpInside += ButtonEditPressed;
+        }
+        internal void GetCellOnline(int position, CustomEditEventHandler handler)
+        {
+            HandlerForButtonEdit = handler;
+            CellPosition = position;
+            BtnGoOnline.TouchUpInside += ButtonOnlinePressed;
+        }
+        internal void GetCellDelete(int position, CustomEditEventHandler handler)
+        {
+            HandlerForButtonEdit = handler;
+            CellPosition = position;
+            BtnDelete.TouchUpInside += ButtonDeletePressed;
+        }
+    }
+    internal class CustomEventCellArgs : EventArgs
+    {
+        public CollectionCellViewController Cell { get; private set; }
+
+        public int Position { get; private set; }
+
+        public CustomEventCellArgs(CollectionCellViewController cell, int position)
+        {
+            this.Cell = cell;
+            this.Position = position;
+        }
+    }
 }

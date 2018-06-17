@@ -10,10 +10,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Login View Controller-->
         <scene sceneID="moA-KB-bae">
             <objects>
-                <viewController id="aEG-It-bEY" sceneMemberID="viewController">
+                <viewController id="aEG-It-bEY" customClass="LoginViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="JyD-qH-Yyw"/>
                         <viewControllerLayoutGuide type="bottom" id="b7T-ve-bd1"/>
@@ -44,14 +44,11 @@
                                                 <rect key="frame" x="0.0" y="30" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                <textInputTraits key="textInputTraits" textContentType="password"/>
+                                                <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vhv-cg-Qyq">
                                                 <rect key="frame" x="0.0" y="60" width="343" height="30"/>
                                                 <state key="normal" title="Log in"/>
-                                                <connections>
-                                                    <segue destination="TWn-8Q-T3y" kind="show" identifier="loginSegue" id="kNb-Qt-9jH"/>
-                                                </connections>
                                             </button>
                                         </subviews>
                                     </stackView>
@@ -69,6 +66,12 @@
                             <constraint firstItem="1LN-NB-wKh" firstAttribute="leading" secondItem="BbR-IV-pNu" secondAttribute="leadingMargin" id="ckW-vd-uz0"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="btnLogin" destination="vhv-cg-Qyq" id="bY5-Vq-KwJ"/>
+                        <outlet property="lblPassword" destination="auk-Oc-NYF" id="ZYG-fh-IWq"/>
+                        <outlet property="lblUser" destination="f9X-1z-RHT" id="pdb-za-7Cn"/>
+                        <segue destination="TWn-8Q-T3y" kind="show" identifier="LoginSegue" id="Idx-et-BtI"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Hr9-OW-NAY" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

@@ -9,9 +9,12 @@ namespace TimeTracking
 {
     public partial class EditUserViewController : UIViewController
     {
+        #region Class Variables
         DatabaseReference root = Database.DefaultInstance.GetRootReference();
         DatabaseReference userNode, rfidNode;
         Employee user_id;
+        #endregion
+
         public EditUserViewController(IntPtr handle) : base(handle)
         {
         }
@@ -24,9 +27,13 @@ namespace TimeTracking
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
+            //Gets the information of the employee, received from the segue.
             user_id = Id;
+            //Gets the a team memeber containing the received user id.
             userNode = root.GetChild("team_members").GetChild(user_id.Id);
+            //Gets the rfid found with the user rfid code.
             rfidNode = root.GetChild("rfid").GetChild(user_id.RFID);
+            //Creates an observe event from the rfid node.
             rfidNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
             {
                 if (snapshot == null)
@@ -35,10 +42,12 @@ namespace TimeTracking
                 }
                 else
                 {
+                    //Sets the information to the user input.
                     var data = snapshot.GetValue<NSDictionary>();
                     lblRfid.Text = data.ValueForKey(new NSString("tag")).ToString();
                 }
             });
+            //Sets the received information to the user input.
             lblName.Text = user_id.Name;
             lblAmount.Text = user_id.Fare.ToString();
             lblPosition.Text = user_id.Position;
@@ -49,6 +58,7 @@ namespace TimeTracking
         }
         partial void editUser_TouchUpInside(NSObject sender)
         {
+            //Gets the data from the inputs
             double fare = Double.Parse(lblAmount.Text);
             string position = lblPosition.Text;
             string name = lblName.Text;
@@ -58,14 +68,17 @@ namespace TimeTracking
             }
             else
             {
+                //Set the keys and value for the rfid node.
                 object[] rfid_keys = { "id", "status", "tag" };
                 object[] rfid_val = { user_id.RFID, 0, lblRfid.Text };
                 var rfid_data = NSDictionary.FromObjectsAndKeys(rfid_val, rfid_keys, rfid_keys.Length);
-                rfidNode.SetValue(rfid_data);                                                                                                                                                                                                    
+                rfidNode.SetValue(rfid_data);          
+                //Set the keys and value for the team_member node.
                 object[] keys = { "authid", "fare", "id", "name", "position", "rfid" };
                 object[] values = { user_id.AuthID, fare, user_id.Id, lblName.Text, lblPosition.Text, user_id.RFID };
                 var obj = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
                 userNode.SetValue(obj);
+                //Returns to the main menu.
                 this.NavigationController.PopViewController(true);
             }
         }
