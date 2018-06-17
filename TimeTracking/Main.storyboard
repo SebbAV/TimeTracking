@@ -817,9 +817,7 @@
                             <outlet property="delegate" destination="Wzh-hh-IDg" id="usS-DV-9T0"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Current Fortnight" id="xlw-Cv-Wfb">
-                        <barButtonItem key="rightBarButtonItem" title="Log out" style="plain" id="BKB-Dl-cB7"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Current Fortnight" id="xlw-Cv-Wfb"/>
                     <connections>
                         <outlet property="navWorker" destination="rKs-kk-Ng8" id="nys-xK-Es8"/>
                         <segue destination="aEG-It-bEY" kind="showDetail" identifier="loginSegue" id="yGP-bS-XEX"/>
