@@ -8,6 +8,7 @@ using UIKit;
 using System.Collections.Generic;
 using Firebase.Database;
 using TimeTracking.Models;
+using Firebase.Auth;
 
 namespace TimeTracking
 {
@@ -268,6 +269,34 @@ namespace TimeTracking
             (segue.DestinationViewController as WorkerMainMenuTableViewController).Employee = selected_employee ;
 
 
+        }
+        partial void logOut_TouchUpInside(NSObject sender)
+        {
+
+            NSError error;
+            var signedOut = Auth.DefaultInstance.SignOut(out error);
+
+            if (!signedOut)
+            {
+                AuthErrorCode errorCode;
+                if (IntPtr.Size == 8) // 64 bits devices
+                    errorCode = (AuthErrorCode)((long)error.Code);
+                else // 32 bits devices
+                    errorCode = (AuthErrorCode)((int)error.Code);
+
+                // Posible error codes that SignOut method with credentials could throw
+                // Visit https://firebase.google.com/docs/auth/ios/errors for more information
+                switch (errorCode)
+                {
+                    case AuthErrorCode.KeychainError:
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                PerformSegue("loginSegue", null);
+            }
         }
 
 

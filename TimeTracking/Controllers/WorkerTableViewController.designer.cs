@@ -12,6 +12,8 @@ namespace TimeTracking
 	[Register ("WorkerTableViewController")]
 	partial class WorkerTableViewController
 	{
+		[Action ("logOut_TouchUpInside:")]
+		partial void logOut_TouchUpInside (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{

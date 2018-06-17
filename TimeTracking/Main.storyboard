@@ -238,6 +238,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Main Menu" id="Pmi-6l-l6O">
+                        <barButtonItem key="leftBarButtonItem" title="Log Out" id="vcL-1e-hGK">
+                            <connections>
+                                <action selector="logOut_TouchUpInside:" destination="PV9-Kx-8qN" id="ChN-wf-Tng"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="BOf-v8-7lU">
                             <connections>
                                 <segue destination="TL4-2W-heC" kind="show" id="hm4-eU-eXR"/>
@@ -248,6 +253,7 @@
                     <connections>
                         <outlet property="CollectionView" destination="rcJ-P4-jVi" id="Qbw-Aw-Es7"/>
                         <segue destination="HWC-1m-wRa" kind="show" identifier="EditSegue" id="BLO-GW-sN6"/>
+                        <segue destination="aEG-It-bEY" kind="showDetail" identifier="loginSegue" id="d0P-bv-zjr"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0S7-ls-HEr" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -666,9 +672,16 @@
                             <outlet property="delegate" destination="Ofa-JI-QK6" id="G31-lh-xhK"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Worker's Time" id="5OC-Je-wBr"/>
+                    <navigationItem key="navigationItem" title="Worker's Time" id="5OC-Je-wBr">
+                        <barButtonItem key="leftBarButtonItem" title="Log Out" id="kcy-uH-JQQ">
+                            <connections>
+                                <action selector="logOut_TouchUpInside:" destination="Ofa-JI-QK6" id="tgZ-Ko-UQe"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <segue destination="Wzh-hh-IDg" kind="show" identifier="Worker_Details" id="fNQ-cj-eo9"/>
+                        <segue destination="aEG-It-bEY" kind="showDetail" identifier="loginSegue" id="zjV-r6-icB"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OgE-s6-i6Y" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -809,7 +822,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="navWorker" destination="rKs-kk-Ng8" id="nys-xK-Es8"/>
-                        <segue destination="aEG-It-bEY" kind="show" identifier="loginSegue" id="yGP-bS-XEX"/>
+                        <segue destination="aEG-It-bEY" kind="showDetail" identifier="loginSegue" id="yGP-bS-XEX"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ilr-LX-ZtD" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -840,6 +853,7 @@
         <image name="user.png" width="32" height="32"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Rnm-XM-0ea"/>
+        <segue reference="fNQ-cj-eo9"/>
+        <segue reference="yGP-bS-XEX"/>
     </inferredMetricsTieBreakers>
 </document>
