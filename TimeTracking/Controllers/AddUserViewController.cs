@@ -32,16 +32,32 @@ namespace TimeTracking
         #region User Interactions
         partial void AddUser_TouchUpInside(NSObject sender)
         {
+            double fare = 0;
             //Generates a auto id for the team members node.
             DatabaseReference adduserNode = userNode.GetChildByAutoId();
             //Gets the information from the view.
-            double fare = Double.Parse(lblAmount.Text);
+            if(Double.TryParse(lblAmount.Text, out fare)){
+                 fare = Double.Parse(lblAmount.Text);
+            }
             string position = lblPosition.Text;
             string name = lblName.Text;
             string rfid = lblRfid.Text;
-            if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0 || position.Length <= 0 || position == null || name == null || name.Length <= 0)
+            string role = "user";
+            if (switchAdmin.On)
             {
-                //TODO: Add warning to user;
+                role = "administrator";
+            }
+            if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0)
+            {
+                CallAlert("Error adding the user", "The amount can't be lower than one.");
+            }
+            if (rfid == null || rfid.Length <= 0)
+            {
+                CallAlert("Error adding the user", "The rfid can't be in blank.");
+            }
+            if (position.Length <= 0 || position == null || name == null || name.Length <= 0)
+            {
+                CallAlert("Error adding the user", "Do not leave empty fields.");
             }
             else
             {
@@ -54,8 +70,8 @@ namespace TimeTracking
                 var rfid_data = NSDictionary.FromObjectsAndKeys(rfid_val, rfid_keys, rfid_keys.Length);
                 addrfidNode.SetValue(rfid_data);
                 //Sets the keys and values for the node.
-                object[] keys = { "authid", "fare", "id", "name", "position", "rfid" };
-                object[] values = { "undefined", fare, adduserNode.Key, name, position, addrfidNode.Key };
+                object[] keys = { "authid", "fare", "id", "name", "position", "rfid","roles" };
+                object[] values = { "undefined", fare, adduserNode.Key, name, position, addrfidNode.Key, role};
                 var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
                 adduserNode.SetValue(data);
                 //Return to the main view.
@@ -64,6 +80,12 @@ namespace TimeTracking
 
         }
         #endregion
-
+        void CallAlert(string title, string message)
+        {
+            var alert = UIAlertController.Create(title, message, UIAlertControllerStyle.Alert);
+            alert.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
+            PresentViewController(alert, true, null);
+        }
     }
+
 }

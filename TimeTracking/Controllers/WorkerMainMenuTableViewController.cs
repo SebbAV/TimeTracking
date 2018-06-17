@@ -2,7 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using Firebase.Auth;
+using Firebase.Database;
 using Foundation;
+using TimeTracking.Models;
 using UIKit;
 
 namespace TimeTracking
@@ -10,18 +13,86 @@ namespace TimeTracking
 	public partial class WorkerMainMenuTableViewController : UITableViewController
 	{
         Employee employee_details;
+        List<TimeTrackingClass> lst_timetracking;
+        DatabaseReference root = Database.DefaultInstance.GetRootReference();
+        DatabaseReference time_trackingNode;
+        TimeTrackingClass timeTracking;
         public Employee Employee { get; set; }
+        public string user_id { get; set; }
         public WorkerMainMenuTableViewController (IntPtr handle) : base (handle) {}
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
             employee_details = Employee;
+            lst_timetracking = new List<TimeTrackingClass>();
+            if(employee_details.WorkedTime == null){
+                time_trackingNode = root.GetChild("time_tracking");
+                loadUserTimes();
+            }
+            else {
+                navWorker.Hidden = true;
+            }
+        }
+
+        /// <summary>
+        /// Method to create a single event to check for values in the timetracking node.
+        ///This contains all the dates that the employees has work.
+        /// </summary>
+        public void loadUserTimes()
+        {
+            DatabaseReference user_ttNode = time_trackingNode.GetChild(employee_details.Id);
+            user_ttNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+            {
+                var data = snapshot.GetValue<NSDictionary>();
+                //Gets the keys for each user in the table.
+                var keys = data.Keys;
+
+                double employee_payment = 0;
+                //Adds the key to the temporary list.
+                employee_details.FortNightWorkedTime = new TimeSpan(0, 0, 0);
+                foreach (var time in data.Values)
+                {
+                    //Gets the information found in the time_tracking node. This also calculates the worked time of the user and stores it into
+                    //a list
+                    timeTracking = new TimeTrackingClass();
+                    timeTracking.End_Date = DateTime.Parse(time.ValueForKey(new NSString("end_date")).ToString());
+                    timeTracking.Start_Date = DateTime.Parse(time.ValueForKey(new NSString("start_date")).ToString());
+
+
+                    DateTime currentDate = DateTime.Now;
+                    if (currentDate.Month == timeTracking.Start_Date.Month)
+                    {
+                        if (timeTracking.Start_Date.Day < 15 && currentDate.Day < 15)
+                        {
+
+                            TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                            employee_payment += Math.Round(worked_time.TotalHours, 2);
+                            employee_details.FortNightWorkedTime += worked_time;
+                            lst_timetracking.Add(timeTracking);
+                        }
+
+
+                        if (currentDate.Day > 15 && timeTracking.Start_Date.Day > 15)
+                        {
+                            TimeSpan worked_time = (timeTracking.End_Date - timeTracking.Start_Date);
+                            employee_payment += Math.Round(worked_time.TotalHours, 2);
+                            employee_details.FortNightWorkedTime += worked_time;
+                            lst_timetracking.Add(timeTracking);
+
+                        }
+                    }
+                }
+                employee_payment = 0;
+                employee_details.WorkedTime = lst_timetracking;
+                lst_timetracking = new List<TimeTrackingClass>();
+                TableView.ReloadData();
+            });
         }
 
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath){
             var cell = tableView.DequeueReusableCell(WorkerMainMenuTableCellViewController.key, indexPath) as WorkerMainMenuTableCellViewController;
-            if (employee_details != null)
+            if (employee_details != null && employee_details.WorkedTime != null)
             {
                 cell.LblStart = employee_details.WorkedTime[indexPath.Row].Start_Date.ToString();
                 cell.LblEnd = employee_details.WorkedTime[indexPath.Row].End_Date.ToString();
@@ -31,7 +102,7 @@ namespace TimeTracking
             return cell;
 
         }
-        public override nint RowsInSection(UITableView tableView, nint section) => employee_details != null ? employee_details.WorkedTime.Count : 1;
+        public override nint RowsInSection(UITableView tableView, nint section) => employee_details.WorkedTime != null ? employee_details.WorkedTime.Count : 1;
         [Export("numberOfSectionsInTableView:")]
         public override nint NumberOfSections(UITableView tableView) => 1;
         [Export("tableView:titleForHeaderInSection:")]
@@ -44,5 +115,32 @@ namespace TimeTracking
 
 
         }
-	}
+
+        partial void logout_TouchUpInside(NSObject sender)
+        {
+            NSError error;
+            var signedOut = Auth.DefaultInstance.SignOut(out error);
+
+            if (!signedOut)
+            {
+                AuthErrorCode errorCode;
+                if (IntPtr.Size == 8) // 64 bits devices
+                    errorCode = (AuthErrorCode)((long)error.Code);
+                else // 32 bits devices
+                    errorCode = (AuthErrorCode)((int)error.Code);
+
+                // Posible error codes that SignOut method with credentials could throw
+                // Visit https://firebase.google.com/docs/auth/ios/errors for more information
+                switch (errorCode)
+                {
+                    case AuthErrorCode.KeychainError:
+                    default:
+                        break;
+                }
+            }
+            else {
+                PerformSegue("loginSegue", null);
+            }
+        }
+    }
 }

@@ -220,8 +220,9 @@ namespace TimeTracking
         void ClickHandler(WorkerTableCellViewController sender, CustomEventArgs args)
         {
             var cell = sender as WorkerTableCellViewController;
+            var yourArgs = args as CustomEventArgs;
 
-            if (cell != null)
+            if (yourArgs != null && cell != null)
             {
                 if (lst_Employees.Count < 1)
                 {
@@ -238,13 +239,6 @@ namespace TimeTracking
                     selected_employee.Payment = lst_Employees[args.Position].Payment;
                     PerformSegue("Worker_Details", null);
                 }
-            }
-
-            var yourArgs = args as CustomEventArgs;
-
-            if (yourArgs != null)
-            {
-                // do stuff
             }
         }
 

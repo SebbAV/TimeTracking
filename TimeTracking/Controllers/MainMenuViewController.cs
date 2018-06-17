@@ -41,8 +41,7 @@ namespace TimeTracking
             tempNode = root.GetChild("temp_entrance");
             userNode = root.GetChild("team_members");
             timetrackingNode = root.GetChild("time_tracking");
-            //Method to load the information of the employees to the collection cell.
-            InitializeFirebase();
+
             //Adds an event to check if there is a change on the userNode.
             FirebaseOnChange();
 
@@ -50,6 +49,12 @@ namespace TimeTracking
             CheckIfOnline_Event();
 
         }
+        public override void ViewWillAppear(bool animated)
+        {
+            //Method to load the information of the employees to the collection cell.
+            InitializeFirebase();
+        }
+
 
         #region Firebase Events
         /// <summary>
@@ -90,6 +95,7 @@ namespace TimeTracking
         /// </summary>
         public void InitializeFirebase()
         {
+            lst_employees = new List<Employee>();
             try
             {
                 userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
@@ -270,8 +276,7 @@ namespace TimeTracking
                         //Updates the child to delete the information from the firebase database.
                         root.UpdateChildValues(childUpdates);
 
-                        //Reloads the collectionview.
-                        CollectionView.ReloadData();
+                        InitializeFirebase();
 
 
                     }));

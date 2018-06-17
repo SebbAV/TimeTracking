@@ -24,14 +24,17 @@ namespace TimeTracking
 		[Outlet]
 		UIKit.UITextField lblRfid { get; set; }
 
+		[Outlet]
+		UIKit.UISwitch switchAdmin { get; set; }
+
 		[Action ("editUser_TouchUpInside:")]
 		partial void editUser_TouchUpInside (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (lblRfid != null) {
-				lblRfid.Dispose ();
-				lblRfid = null;
+			if (switchAdmin != null) {
+				switchAdmin.Dispose ();
+				switchAdmin = null;
 			}
 
 			if (lblAmount != null) {
@@ -47,6 +50,11 @@ namespace TimeTracking
 			if (lblPosition != null) {
 				lblPosition.Dispose ();
 				lblPosition = null;
+			}
+
+			if (lblRfid != null) {
+				lblRfid.Dispose ();
+				lblRfid = null;
 			}
 		}
 	}

@@ -59,12 +59,29 @@ namespace TimeTracking
         partial void editUser_TouchUpInside(NSObject sender)
         {
             //Gets the data from the inputs
-            double fare = Double.Parse(lblAmount.Text);
+            double fare = 0;
+            if (Double.TryParse(lblAmount.Text, out fare))
+            {
+                fare = Double.Parse(lblAmount.Text);
+            }
             string position = lblPosition.Text;
             string name = lblName.Text;
-            if (fare < 0 || fare.ToString() == null || fare.ToString().Length <= 0 || position.Length <= 0 || position == null || name == null || name.Length <= 0)
+            string role = "user";
+            if(switchAdmin.On){
+                role = "administrator";
+            }
+            string rfid = lblRfid.Text;
+            if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0)
             {
-                //TODO: Add warning to user;
+                CallAlert("Error adding the user", "The amount can't be lower than one.");
+            }
+            if (rfid == null || rfid.Length <= 0)
+            {
+                CallAlert("Error adding the user", "The rfid can't be in blank.");
+            }
+            if (position.Length <= 0 || position == null || name == null || name.Length <= 0)
+            {
+                CallAlert("Error adding the user", "Do not leave empty fields.");
             }
             else
             {
@@ -74,13 +91,19 @@ namespace TimeTracking
                 var rfid_data = NSDictionary.FromObjectsAndKeys(rfid_val, rfid_keys, rfid_keys.Length);
                 rfidNode.SetValue(rfid_data);          
                 //Set the keys and value for the team_member node.
-                object[] keys = { "authid", "fare", "id", "name", "position", "rfid" };
-                object[] values = { user_id.AuthID, fare, user_id.Id, lblName.Text, lblPosition.Text, user_id.RFID };
+                object[] keys = { "authid", "fare", "id", "name", "position", "rfid","roles" };
+                object[] values = { user_id.AuthID, fare, user_id.Id, lblName.Text, lblPosition.Text, user_id.RFID,role };
                 var obj = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
                 userNode.SetValue(obj);
                 //Returns to the main menu.
                 this.NavigationController.PopViewController(true);
             }
+        }
+        void CallAlert(string title, string message)
+        {
+            var alert = UIAlertController.Create(title, message, UIAlertControllerStyle.Alert);
+            alert.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
+            PresentViewController(alert, true, null);
         }
     }
 }

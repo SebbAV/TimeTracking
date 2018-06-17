@@ -9,45 +9,53 @@ using System.CodeDom.Compiler;
 
 namespace TimeTracking
 {
-	[Register ("AddUserViewController")]
-	partial class AddUserViewController
-	{
-		[Outlet]
-		UIKit.UITextField lblAmount { get; set; }
+    [Register ("AddUserViewController")]
+    partial class AddUserViewController
+    {
+        [Outlet]
+        UIKit.UITextField lblAmount { get; set; }
 
-		[Outlet]
-		UIKit.UITextField lblName { get; set; }
+        [Outlet]
+        UIKit.UITextField lblName { get; set; }
 
-		[Outlet]
-		UIKit.UITextField lblPosition { get; set; }
+        [Outlet]
+        UIKit.UITextField lblPosition { get; set; }
 
-		[Outlet]
-		UIKit.UITextField lblRfid { get; set; }
+        [Outlet]
+        UIKit.UITextField lblRfid { get; set; }
 
-		[Action ("AddUser_TouchUpInside:")]
-		partial void AddUser_TouchUpInside (Foundation.NSObject sender);
-		
-		void ReleaseDesignerOutlets ()
-		{
-			if (lblAmount != null) {
-				lblAmount.Dispose ();
-				lblAmount = null;
-			}
+        [Outlet]
+        UIKit.UISwitch switchAdmin { get; set; }
 
-			if (lblRfid != null) {
-				lblRfid.Dispose ();
-				lblRfid = null;
-			}
+        [Action ("AddUser_TouchUpInside:")]
+        partial void AddUser_TouchUpInside (Foundation.NSObject sender);
+        
+        void ReleaseDesignerOutlets ()
+        {
+            if (lblAmount != null) {
+                lblAmount.Dispose ();
+                lblAmount = null;
+            }
 
-			if (lblName != null) {
-				lblName.Dispose ();
-				lblName = null;
-			}
+            if (lblName != null) {
+                lblName.Dispose ();
+                lblName = null;
+            }
 
-			if (lblPosition != null) {
-				lblPosition.Dispose ();
-				lblPosition = null;
-			}
-		}
-	}
+            if (lblPosition != null) {
+                lblPosition.Dispose ();
+                lblPosition = null;
+            }
+
+            if (lblRfid != null) {
+                lblRfid.Dispose ();
+                lblRfid = null;
+            }
+
+            if (switchAdmin != null) {
+                switchAdmin.Dispose ();
+                switchAdmin = null;
+            }
+        }
+    }
 }

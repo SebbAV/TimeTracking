@@ -5,16 +5,29 @@ using System;
 using Foundation;
 using UIKit;
 using Firebase.Auth;
+using Firebase.Database;
+using TimeTracking.Models;
+using System.Collections.Generic;
 
 namespace TimeTracking
 {
 	public partial class LoginViewController : UIViewController
 	{
         public LoginViewController (IntPtr handle) : base (handle) {}
+        DatabaseReference root = Database.DefaultInstance.GetRootReference();
+        DatabaseReference userNode;
+        Employee selected_employee;
+        TimeTrackingClass timeTracking;
+        List<TimeTrackingClass> lst_timetracking;
+        DatabaseReference time_trackingNode;
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
+            selected_employee = new Employee();
+            userNode = root.GetChild("team_members");
+            time_trackingNode = root.GetChild("time_tracking");
             btnLogin.TouchUpInside += BtnLogin_TouchUpInside;
+
 
       }
 
@@ -53,14 +66,58 @@ namespace TimeTracking
               
             }
             else {
-                PerformSegue("LoginSegue", null);
+                try
+                {
+                    userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
+                    {
+                        var data = snapshot.GetValue<NSDictionary>();
+                        var employees = data.Values;
+                        //For each eployee found in the team_members users. It adds it to our global list.
+                        foreach (var employee in employees)
+                        {
+                            if (user.Uid == employee.ValueForKey(new NSString("authid")).ToString())
+                            {
+                                if ("administrator" == employee.ValueForKey(new NSString("roles")).ToString())
+                                {
+                                    PerformSegue("LoginSegue", null);
+                                }
+                                else
+                                {
+                                    selected_employee = new Employee();
+                                    selected_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
+                                    selected_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
+                                    selected_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
+                                    selected_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
+                                    selected_employee.Fare = Double.Parse(employee.ValueForKey(new NSString("fare")).ToString());
+                                    PerformSegue("WorkerSegue", null);
+                                }
+                            }
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+
             }
 
         }
+
         void CallAlert(string title, string message){
             var alert = UIAlertController.Create(title, message, UIAlertControllerStyle.Alert);
             alert.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
             PresentViewController(alert, true, null);
+        }
+        public override void PrepareForSegue(UIStoryboardSegue segue, Foundation.NSObject sender)
+        {
+            base.PrepareForSegue(segue, sender);
+            if (segue.Identifier != "WorkerSegue")
+                return;
+            (segue.DestinationViewController as WorkerMainMenuTableViewController).Employee = selected_employee;
+
+
         }
 
 	}

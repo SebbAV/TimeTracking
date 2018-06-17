@@ -12,9 +12,18 @@ namespace TimeTracking
 	[Register ("WorkerMainMenuTableViewController")]
 	partial class WorkerMainMenuTableViewController
 	{
+		[Outlet]
+		UIKit.UINavigationBar navWorker { get; set; }
+
+		[Action ("logout_TouchUpInside:")]
+		partial void logout_TouchUpInside (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (navWorker != null) {
+				navWorker.Dispose ();
+				navWorker = null;
+			}
 		}
 	}
 }
