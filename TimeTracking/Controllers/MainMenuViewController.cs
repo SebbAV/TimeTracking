@@ -223,30 +223,32 @@ namespace TimeTracking
 
             //Calls a custom GetCellMethod that sends the current position of the cell and the click handler.
             cell.GetCellEdit(indexPath.Row, ClickHandler);
-            cell.Name = lst_employees[indexPath.Row].Name;
-            cell.Position = lst_employees[indexPath.Row].Position;
-            cell.Id = lst_employees[indexPath.Row].Id;
-            if (lst_employees[indexPath.Row].Status == null)
+            if (lst_employees != null)
             {
-                cell.Status = "Offline";
+                cell.Name = lst_employees[indexPath.Row].Name;
+                cell.Position = lst_employees[indexPath.Row].Position;
+                cell.Id = lst_employees[indexPath.Row].Id;
 
+                if (lst_employees[indexPath.Row].Status == null)
+                {
+                    cell.Status = "Offline";
+
+                }
+                else
+                {
+                    cell.Status = lst_employees[indexPath.Row].Status;
+
+                }
             }
 
-            else
-            {
-                cell.Status = lst_employees[indexPath.Row].Status;
 
-            }
             cell.BackgroundColor = UIColor.LightGray;
             //Method that initialize all the buttons in the Cell.
             initilizeButton(cell);
             return cell;
         }
 
-        public nint GetItemsCount(UICollectionView collectionView, nint section)
-        {
-            return lst_employees.Count;
-        }
+        public nint GetItemsCount(UICollectionView collectionView, nint section) => lst_employees != null ? lst_employees.Count : 1;
         #endregion
 
         #region Internal Functionallity

@@ -210,9 +210,12 @@ namespace TimeTracking
         {
             var cell = tableView.DequeueReusableCell(WorkerTableCellViewController.key, indexPath) as WorkerTableCellViewController;
             cell.GetCell(indexPath.Section, ClickHandler);
-            lst_Employees[indexPath.Section].Payment = Math.Round(lst_Employees[indexPath.Section].Fare * lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours,2);
-            cell.LblAmount = $"${lst_Employees[indexPath.Section].Payment}";
-            cell.LblHours = $"{lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours}";
+            if (lst_Employees != null)
+            {
+                lst_Employees[indexPath.Section].Payment = Math.Round(lst_Employees[indexPath.Section].Fare * lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours, 2);
+                cell.LblAmount = $"${lst_Employees[indexPath.Section].Payment}";
+                cell.LblHours = $"{lst_Employees[indexPath.Section].FortNightWorkedTime.TotalHours}";
+            }
 
 
             return cell;
@@ -248,10 +251,10 @@ namespace TimeTracking
         public override nint RowsInSection(UITableView tableView, nint section) =>  section_number;
 
         [Export("numberOfSectionsInTableView:")]
-        public override nint NumberOfSections(UITableView tableView) =>  lst_Employees.Count;
+        public override nint NumberOfSections(UITableView tableView) => lst_Employees != null ? lst_Employees.Count : 1;
 
         [Export("tableView:titleForHeaderInSection:")]
-        public override string TitleForHeader(UITableView tableView, nint section) =>  lst_Employees[(int)section].Name;
+        public override string TitleForHeader(UITableView tableView, nint section) => lst_Employees != null ? lst_Employees[(int)section].Name : "No Name";
 
 
 
