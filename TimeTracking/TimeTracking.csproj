@@ -170,6 +170,12 @@
     <BundleResource Include="Resources\user.png" />
     <BundleResource Include="GoogleService-Info.plist" />
     <BundleResource Include="Resources\TimeTracking.entitlements" />
+    <BundleResource Include="Resources\calendar_32.png" />
+    <BundleResource Include="Resources\avatar_32.png" />
+    <BundleResource Include="Resources\edit_32.png" />
+    <BundleResource Include="Resources\logout_32.png" />
+    <BundleResource Include="Resources\logout_24.png" />
+    <BundleResource Include="Resources\cbqa_white.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Build.Download.0.4.6\build\Xamarin.Build.Download.targets" Condition="Exists('..\packages\Xamarin.Build.Download.0.4.6\build\Xamarin.Build.Download.targets')" />

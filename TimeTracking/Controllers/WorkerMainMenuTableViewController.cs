@@ -18,14 +18,23 @@ namespace TimeTracking
         DatabaseReference time_trackingNode;
         TimeTrackingClass timeTracking;
         public Employee Employee { get; set; }
+        public Employee EmployeeAdmin { get; set; }
         public string user_id { get; set; }
         public WorkerMainMenuTableViewController (IntPtr handle) : base (handle) {}
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            employee_details = Employee;
+
             lst_timetracking = new List<TimeTrackingClass>();
+            //TODO: Validate if user has no time to delete the top bar.
+            if(Employee == null){
+                employee_details = EmployeeAdmin;
+                navWorker.Hidden = true;
+            }
+            else {
+                employee_details = Employee;
+            }
             if(employee_details.WorkedTime == null){
                 time_trackingNode = root.GetChild("time_tracking");
                 loadUserTimes();
@@ -41,9 +50,12 @@ namespace TimeTracking
         /// </summary>
         public void loadUserTimes()
         {
+          
             DatabaseReference user_ttNode = time_trackingNode.GetChild(employee_details.Id);
             user_ttNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
             {
+                try
+                {
                 var data = snapshot.GetValue<NSDictionary>();
                 //Gets the keys for each user in the table.
                 var keys = data.Keys;
@@ -87,6 +99,8 @@ namespace TimeTracking
                 employee_details.WorkedTime = lst_timetracking;
                 lst_timetracking = new List<TimeTrackingClass>();
                 TableView.ReloadData();
+            }
+                catch (Exception ex ) {}
             });
         }
 
@@ -98,6 +112,11 @@ namespace TimeTracking
                 cell.LblEnd = employee_details.WorkedTime[indexPath.Row].End_Date.ToString();
                 TimeSpan worked_time = employee_details.WorkedTime[indexPath.Row].End_Date - employee_details.WorkedTime[indexPath.Row].Start_Date;
                 cell.LblTime = worked_time.ToString();
+            }
+            else {
+                cell.LblStart = "0:00:00";
+                cell.LblEnd = "0:00:00";
+                cell.LblTime = "0:00:00";
             }
             return cell;
 

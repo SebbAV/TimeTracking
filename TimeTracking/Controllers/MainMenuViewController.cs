@@ -240,9 +240,9 @@ namespace TimeTracking
 
                 }
             }
-
-
-            cell.BackgroundColor = UIColor.LightGray;
+            //cell.BackgroundColor = new UIColor(red: 0.80f, green: 0.90f, blue: 1.00f, alpha: 1.0f);
+            //cell.BackgroundColor = new UIColor(red: 0.90f, green: 0.95f, blue: 1.00f, alpha: 1.0f);
+            cell.BackgroundColor = new UIColor(red: 0.95f, green: 0.94f, blue: 0.94f, alpha: 1.0f);
             //Method that initialize all the buttons in the Cell.
             initilizeButton(cell);
             return cell;

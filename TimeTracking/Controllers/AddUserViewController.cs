@@ -5,6 +5,7 @@ using System;
 using Foundation;
 using UIKit;
 using Firebase.Database;
+using Firebase.Auth;
 
 namespace TimeTracking
 {
@@ -32,51 +33,98 @@ namespace TimeTracking
         #region User Interactions
         partial void AddUser_TouchUpInside(NSObject sender)
         {
-            double fare = 0;
-            //Generates a auto id for the team members node.
-            DatabaseReference adduserNode = userNode.GetChildByAutoId();
-            //Gets the information from the view.
-            if(Double.TryParse(lblAmount.Text, out fare)){
-                 fare = Double.Parse(lblAmount.Text);
-            }
-            string position = lblPosition.Text;
-            string name = lblName.Text;
-            string rfid = lblRfid.Text;
-            string role = "user";
-            if (switchAdmin.On)
+            if ( lblPassword.ToString() == null || lblPassword.ToString().Length <= 0)
             {
-                role = "administrator";
+                CallAlert("Error adding the user", "Do not leave the password in blank.");
             }
-            if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0)
+            if ( lblEmail.ToString() == null || lblEmail.ToString().Length <= 0)
             {
-                CallAlert("Error adding the user", "The amount can't be lower than one.");
+                CallAlert("Error adding the user", "Do not leave the email in blank.");
             }
-            if (rfid == null || rfid.Length <= 0)
+            Auth.DefaultInstance.CreateUser(lblEmail.Text, lblPassword.Text, HandleAuthResult);
+
+            void HandleAuthResult(User user, NSError error)
             {
-                CallAlert("Error adding the user", "The rfid can't be in blank.");
+                if (error != null)
+                {
+                    AuthErrorCode errorCode;
+                    if (IntPtr.Size == 8) // 64 bits devices
+                        errorCode = (AuthErrorCode)((long)error.Code);
+                    else // 32 bits devices
+                        errorCode = (AuthErrorCode)((int)error.Code);
+
+                    // Posible error codes that CreateUser method could throw
+                    switch (errorCode)
+                    {
+                        case AuthErrorCode.InvalidEmail:
+                            CallAlert("Error", "Please insert a valid email");
+                            break;
+                        case AuthErrorCode.EmailAlreadyInUse:
+                            CallAlert("Error", "Email is already in use");
+                            break;
+                        case AuthErrorCode.OperationNotAllowed:
+                            CallAlert("Error", "Operation not allowed");
+                            break;
+                        case AuthErrorCode.WeakPassword:
+                            CallAlert("Error", "Insecure password, please try again");
+                            break;
+                        default:
+                            // Print error
+                            break;
+                    }
+
+                   
+                }
+                else {
+                    double fare = 0;
+                    //Generates a auto id for the team members node.
+                    DatabaseReference adduserNode = userNode.GetChildByAutoId();
+                    //Gets the information from the view.
+                    if (Double.TryParse(lblAmount.Text, out fare))
+                    {
+                        fare = Double.Parse(lblAmount.Text);
+                    }
+                    string position = lblPosition.Text;
+                    string name = lblName.Text;
+                    string rfid = lblRfid.Text;
+                    string role = "user";
+                    if (switchAdmin.On)
+                    {
+                        role = "administrator";
+                    }
+                    if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0)
+                    {
+                        CallAlert("Error adding the user", "The amount can't be lower than one.");
+                    }
+                    if (rfid == null || rfid.Length <= 0)
+                    {
+                        CallAlert("Error adding the user", "The rfid can't be in blank.");
+                    }
+                    if (position.Length <= 0 || position == null || name == null || name.Length <= 0)
+                    {
+                        CallAlert("Error adding the user", "Do not leave empty fields.");
+                    }
+                    else
+                    {
+                        //Generates an auto id for the rfid node.
+                        DatabaseReference addrfidNode = rfidNode.GetChildByAutoId();
+                        //Sets the keys and values for the node.
+                        object[] rfid_keys = { "id", "status", "tag" };
+                        object[] rfid_val = { addrfidNode.Key, 0, lblRfid.Text };
+                        //Join the key with the nodes.
+                        var rfid_data = NSDictionary.FromObjectsAndKeys(rfid_val, rfid_keys, rfid_keys.Length);
+                        addrfidNode.SetValue(rfid_data);
+                        //Sets the keys and values for the node.
+                        object[] keys = { "authid", "fare", "id", "name", "position", "rfid", "roles" };
+                        object[] values = { user.Uid, fare, adduserNode.Key, name, position, addrfidNode.Key, role };
+                        var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
+                        adduserNode.SetValue(data);
+                        //Return to the main view.
+                        this.NavigationController.PopViewController(true);
+                    }
+                }
             }
-            if (position.Length <= 0 || position == null || name == null || name.Length <= 0)
-            {
-                CallAlert("Error adding the user", "Do not leave empty fields.");
-            }
-            else
-            {
-                //Generates an auto id for the rfid node.
-                DatabaseReference addrfidNode = rfidNode.GetChildByAutoId();
-                //Sets the keys and values for the node.
-                object[] rfid_keys = { "id", "status", "tag" };
-                object[] rfid_val = { addrfidNode.Key, 0, lblRfid.Text };
-                //Join the key with the nodes.
-                var rfid_data = NSDictionary.FromObjectsAndKeys(rfid_val, rfid_keys, rfid_keys.Length);
-                addrfidNode.SetValue(rfid_data);
-                //Sets the keys and values for the node.
-                object[] keys = { "authid", "fare", "id", "name", "position", "rfid","roles" };
-                object[] values = { "undefined", fare, adduserNode.Key, name, position, addrfidNode.Key, role};
-                var data = NSDictionary.FromObjectsAndKeys(values, keys, keys.Length);
-                adduserNode.SetValue(data);
-                //Return to the main view.
-                this.NavigationController.PopViewController(true);
-            }
+
 
         }
         #endregion

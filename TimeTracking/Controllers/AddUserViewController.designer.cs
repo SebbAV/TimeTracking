@@ -16,7 +16,13 @@ namespace TimeTracking
         UIKit.UITextField lblAmount { get; set; }
 
         [Outlet]
+        UIKit.UITextField lblEmail { get; set; }
+
+        [Outlet]
         UIKit.UITextField lblName { get; set; }
+
+        [Outlet]
+        UIKit.UITextField lblPassword { get; set; }
 
         [Outlet]
         UIKit.UITextField lblPosition { get; set; }
@@ -32,6 +38,16 @@ namespace TimeTracking
         
         void ReleaseDesignerOutlets ()
         {
+            if (lblEmail != null) {
+                lblEmail.Dispose ();
+                lblEmail = null;
+            }
+
+            if (lblPassword != null) {
+                lblPassword.Dispose ();
+                lblPassword = null;
+            }
+
             if (lblAmount != null) {
                 lblAmount.Dispose ();
                 lblAmount = null;

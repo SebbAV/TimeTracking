@@ -141,9 +141,9 @@ namespace TimeTracking
         public void loadUserTimes(){
             time_trackingNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
             {
-            var data = snapshot.GetValue<NSDictionary>();
-            //Gets the keys for each user in the table.
-            var keys = data.Keys;
+                var data = snapshot.GetValue<NSDictionary>();
+                //Gets the keys for each user in the table.
+                var keys = data.Keys;
                 key_list = new List<string>();
                 foreach (var key in keys)
                 {
@@ -194,11 +194,11 @@ namespace TimeTracking
 
                                 }
                             }
-                        }
-                        employee_payment = 0;  
+                        } 
                         temp_employee.WorkedTime = lst_timetracking;
                         //Finds the employee in the current index and update the information of the employee
                         lst_Employees[index] = temp_employee;
+                        employee_payment = 0;
                         lst_timetracking = new List<TimeTrackingClass>();   
                     }
 
@@ -269,7 +269,7 @@ namespace TimeTracking
             base.PrepareForSegue(segue, sender);
             if (segue.Identifier != "Worker_Details")
                 return;
-            (segue.DestinationViewController as WorkerMainMenuTableViewController).Employee = selected_employee ;
+            (segue.DestinationViewController as WorkerMainMenuTableViewController).EmployeeAdmin = selected_employee ;
 
 
         }

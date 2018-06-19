@@ -35,6 +35,7 @@ namespace TimeTracking
 
         void HandleAuthResultHandler(User user, NSError error)
         {
+
             if (error != null)
             {
                 AuthErrorCode errorCode;
@@ -58,52 +59,51 @@ namespace TimeTracking
                     case AuthErrorCode.WrongPassword:
                         CallAlert("Wrong Password", "Please check that your password is correct");
                         break;
-                        
+
                     default:
                         CallAlert("Error", "Please check your Email address");
                         break;
                 }
-              
             }
-            else {
-                try
+                else
                 {
                     userNode.ObserveSingleEvent(DataEventType.Value, (snapshot) =>
-                    {
-                        var data = snapshot.GetValue<NSDictionary>();
-                        var employees = data.Values;
-                        //For each eployee found in the team_members users. It adds it to our global list.
-                        foreach (var employee in employees)
-                        {
-                            if (user.Uid == employee.ValueForKey(new NSString("authid")).ToString())
-                            {
-                                if ("administrator" == employee.ValueForKey(new NSString("roles")).ToString())
-                                {
-                                    PerformSegue("LoginSegue", null);
-                                }
-                                else
-                                {
-                                    selected_employee = new Employee();
-                                    selected_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
-                                    selected_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
-                                    selected_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
-                                    selected_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
-                                    selected_employee.Fare = Double.Parse(employee.ValueForKey(new NSString("fare")).ToString());
-                                    PerformSegue("WorkerSegue", null);
-                                }
-                            }
-                        }
-                    });
+                     {
+                         try
+                         {
+                             var data = snapshot.GetValue<NSDictionary>();
+                             var employees = data.Values;
+                            //For each eployee found in the team_members users. It adds it to our global list.
+                            foreach (var employee in employees)
+                             {
+                                 if (user.Uid == employee.ValueForKey(new NSString("authid")).ToString())
+                                 {
+                                     if ("administrator" == employee.ValueForKey(new NSString("roles")).ToString())
+                                     {
+                                         PerformSegue("LoginSegue", null);
+                                     }
+                                     else
+                                     {
+                                         selected_employee = new Employee();
+                                         selected_employee.Name = employee.ValueForKey(new NSString("name")).ToString();
+                                         selected_employee.Id = employee.ValueForKey(new NSString("id")).ToString();
+                                         selected_employee.RFID = employee.ValueForKey(new NSString("rfid")).ToString();
+                                         selected_employee.Position = employee.ValueForKey(new NSString("position")).ToString();
+                                         selected_employee.Fare = Double.Parse(employee.ValueForKey(new NSString("fare")).ToString());
+                                         PerformSegue("WorkerSegue", null);
+                                     }
+                                 }
+                             }
+                         }
+                         catch (Exception ex)
+                         {
+                             CallAlert("Error", "Inactive Account");
+                         }
+
+
+                     });
                 }
-                catch (Exception ex)
-                {
-
-                }
-
-
             }
-
-        }
 
         void CallAlert(string title, string message){
             var alert = UIAlertController.Create(title, message, UIAlertControllerStyle.Alert);
