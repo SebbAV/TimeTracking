@@ -14,6 +14,9 @@ namespace TimeTracking
 	{
 		[Outlet]
 		UIKit.UICollectionView CollectionView { get; set; }
+
+		[Action ("logOut_TouchUpInside:")]
+		partial void logOut_TouchUpInside (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{

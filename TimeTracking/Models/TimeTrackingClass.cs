@@ -1,27 +1,28 @@
 ﻿using System;
-namespace TimeTracking
+namespace TimeTracking.Models
 {
-    public class Employee
+    public class TimeTrackingClass
     {
-        public string Id
+        public DateTime Start_Date
         {
             get;
             set;
         }
-        public string Name
+        public DateTime End_Date
         {
             get;
             set;
         }
-        public string Position
+        public int Status
         {
             get;
             set;
         }
-        public string RFID
+        public string uid_worker
         {
             get;
             set;
         }
+
     }
 }
