@@ -1,5 +1,5 @@
 ﻿<Properties StartupConfiguration="{67D6D083-9E72-49E3-83F8-8217CF25D5C8}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="TimeTracking Status">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/AddUserViewController.cs">
     <Files>
       <File FileName="Controllers/WorkerTableViewController.cs" Line="272" Column="97" />
       <File FileName="Controllers/MainMenuViewController.cs" Line="245" Column="13" />
@@ -7,7 +7,7 @@
       <File FileName="Models/TimeTrackingClass.cs" Line="1" Column="1" />
       <File FileName="Main.cs" Line="1" Column="1" />
       <File FileName="AppDelegate.cs" Line="1" Column="1" />
-      <File FileName="Controllers/AddUserViewController.cs" Line="94" Column="22" />
+      <File FileName="Controllers/AddUserViewController.cs" Line="96" Column="22" />
       <File FileName="Controllers/AddUserViewController.designer.cs" Line="30" Column="17" />
       <File FileName="Controllers/EditUserViewController.designer.cs" Line="1" Column="1" />
       <File FileName="Controllers/EditUserViewController.cs" Line="1" Column="1" />
@@ -21,7 +21,6 @@
       <File FileName="Entitlements.plist" />
       <File FileName="Info.plist" />
       <File FileName="../../../../../../../../Library/Frameworks/Xamarin.iOS.framework/Versions/11.12.0.4/lib/msbuild/iOS/Xamarin.iOS.Common.targets" Line="1" Column="1" />
-      <File FileName="TimeTracking Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" />

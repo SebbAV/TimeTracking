@@ -33,15 +33,42 @@ namespace TimeTracking
         #region User Interactions
         partial void AddUser_TouchUpInside(NSObject sender)
         {
+            double fare = 0;
             if ( lblPassword.ToString() == null || lblPassword.ToString().Length <= 0)
             {
                 CallAlert("Error adding the user", "Do not leave the password in blank.");
             }
-            if ( lblEmail.ToString() == null || lblEmail.ToString().Length <= 0)
+            else if ( lblEmail.ToString() == null || lblEmail.ToString().Length <= 0)
             {
                 CallAlert("Error adding the user", "Do not leave the email in blank.");
             }
-            Auth.DefaultInstance.CreateUser(lblEmail.Text, lblPassword.Text, HandleAuthResult);
+            if (Double.TryParse(lblAmount.Text, out fare))
+            {
+                fare = Double.Parse(lblAmount.Text);
+            }
+            string position = lblPosition.Text;
+            string name = lblName.Text;
+            string rfid = lblRfid.Text;
+            string role = "user";
+            if (switchAdmin.On)
+            {
+                role = "administrator";
+            }
+            if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0)
+            {
+                CallAlert("Error adding the user", "The amount can't be lower than one.");
+            }
+            else if (rfid == null || rfid.Length <= 0)
+            {
+                CallAlert("Error adding the user", "The rfid can't be in blank.");
+            }
+            else if (position.Length <= 0 || position == null || name == null || name.Length <= 0)
+            {
+                CallAlert("Error adding the user", "Do not leave empty fields.");
+            }
+            else {
+                Auth.DefaultInstance.CreateUser(lblEmail.Text, lblPassword.Text, HandleAuthResult);
+            }
 
             void HandleAuthResult(User user, NSError error)
             {
@@ -76,36 +103,9 @@ namespace TimeTracking
                    
                 }
                 else {
-                    double fare = 0;
+                    
                     //Generates a auto id for the team members node.
                     DatabaseReference adduserNode = userNode.GetChildByAutoId();
-                    //Gets the information from the view.
-                    if (Double.TryParse(lblAmount.Text, out fare))
-                    {
-                        fare = Double.Parse(lblAmount.Text);
-                    }
-                    string position = lblPosition.Text;
-                    string name = lblName.Text;
-                    string rfid = lblRfid.Text;
-                    string role = "user";
-                    if (switchAdmin.On)
-                    {
-                        role = "administrator";
-                    }
-                    if (fare <= 0 || fare.ToString() == null || fare.ToString().Length <= 0)
-                    {
-                        CallAlert("Error adding the user", "The amount can't be lower than one.");
-                    }
-                    if (rfid == null || rfid.Length <= 0)
-                    {
-                        CallAlert("Error adding the user", "The rfid can't be in blank.");
-                    }
-                    if (position.Length <= 0 || position == null || name == null || name.Length <= 0)
-                    {
-                        CallAlert("Error adding the user", "Do not leave empty fields.");
-                    }
-                    else
-                    {
                         //Generates an auto id for the rfid node.
                         DatabaseReference addrfidNode = rfidNode.GetChildByAutoId();
                         //Sets the keys and values for the node.
@@ -121,7 +121,6 @@ namespace TimeTracking
                         adduserNode.SetValue(data);
                         //Return to the main view.
                         this.NavigationController.PopViewController(true);
-                    }
                 }
             }
 

@@ -27,6 +27,18 @@ namespace TimeTracking
             userNode = root.GetChild("team_members");
             time_trackingNode = root.GetChild("time_tracking");
             btnLogin.TouchUpInside += BtnLogin_TouchUpInside;
+            lblUser.EditingChanged += (sender, e) => {
+                UITextField selectedField = (UITextField)sender;
+                if (selectedField.Text.Length > 30)
+                   lblUser.Text = lblUser.Text.Remove(selectedField.Text.Length - 1);
+                 
+            };
+            lblPassword.EditingChanged += (sender, e) => {
+                UITextField selectedField = (UITextField)sender;
+                if (selectedField.Text.Length > 30)
+                    lblPassword.Text = lblPassword.Text.Remove(selectedField.Text.Length - 1);
+
+            };
 
 
       }
